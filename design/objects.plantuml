@@ -1,0 +1,52 @@
+@startuml
+
+:User: as user
+:Admin: as admin
+:IdP: as idp
+:AddProvider: as ads
+:PaymentService: as pay_service
+
+(Login) as login
+(Logout) as logout
+(Create Account) as create_acc
+(Update Account) as update_acc
+(Add drill to system) as add_drill
+(Add drill to account) as choose_drill
+(Manage users) as manage_users
+(View progress) as view_prog
+(Perform drill) as perform_drill
+(View example sentences) as view_example
+(Level up) as level_up
+(Hide adds) as hide_adds
+(Pay) as pay
+(Show adds) as show_adds
+(Send feedback) as feedback
+(View feedback) as view_feedback
+(Buy T-Shirt) as tshirt
+
+user <|-- admin
+user --> login
+user --> logout
+login --> idp
+admin --> add_drill
+admin --> manage_users
+admin --> view_feedback
+ads --> show_adds
+user -> feedback
+feedback --> admin
+user --> update_acc
+user --> create_acc
+user --> choose_drill
+user --> view_prog
+user --> perform_drill 
+perform_drill --> level_up
+user --> view_example
+update_acc -> hide_adds
+hide_adds --> pay
+pay --> pay_service
+user --> tshirt
+tshirt --> pay
+
+
+
+@enduml
