@@ -28,29 +28,25 @@ func main() {
 		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
 
-	address := viper.GetString("address")
-
-	env := api.Env{}
+	config := &d.Config{}
+	viper.Unmarshal(config)
+	env := api.Env{Config: config}
 
 	mux := route.NewRestRouter(&env)
 	graceFul(&env)
 
 	log.WithFields(log.Fields{
 		"version": d.Version,
-		"address": address,
-		"repo":    viper.GetString("repo.type"),
+		"address": config.Address,
 	}).Info("Kunren started")
 
-	https := &d.Https{}
-	viper.UnmarshalKey("https", https)
+	if config.Https.Enabled {
+		cert := config.Https.CertPath
+		key := config.Https.KeyPath
 
-	if https.Enabled {
-		cert := https.CertPath
-		key := https.KeyPath
-
-		log.Fatal(http.ListenAndServeTLS(address, cert, key, mux))
+		log.Fatal(http.ListenAndServeTLS(config.Address, cert, key, mux))
 	} else {
-		log.Fatal(http.ListenAndServe(address, mux))
+		log.Fatal(http.ListenAndServe(config.Address, mux))
 	}
 }
 

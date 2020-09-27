@@ -6,19 +6,13 @@ type Welcome struct {
 	Hello   string `json:"message"`
 }
 
-// Https support
-type Https struct {
-	Enabled  bool   `json:"enabled"`
-	CertPath string `json:"certPath"`
-	KeyPath  string `json:"keyPath"`
-}
-
 type Question struct {
+	ID int `json:"id"`
 	Question string `json:"q"`
 	Answer string `json:"a"`
 	Features []string `json:"fs"`
 }
 
 type Questions struct {
-	Questions map[string]Question `json:"qs"`
+	Questions []Question `json:"qs"`
 }

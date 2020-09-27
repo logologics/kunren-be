@@ -3,11 +3,14 @@ package api
 import (
 	"fmt"
 	"net/http"
+	d "github.com/logologics/kunren-be/internal/domain"
 	log "github.com/sirupsen/logrus"
 
 )
 
-type Env struct {}
+type Env struct {
+	Config *d.Config
+}
 
 // AppHandlerFunc that return error
 type AppHandlerFunc func(http.ResponseWriter, *http.Request) error
