@@ -30,7 +30,11 @@ func main() {
 
 	config := &d.Config{}
 	viper.Unmarshal(config)
-	env := api.Env{Config: config}
+	repo, err := api.CreateRepo(config)
+	if err != nil {
+		log.Fatal("Can't create repo: %v", err)
+	}
+	env := api.Env{Config: config, Repo: repo}
 
 	mux := route.NewRestRouter(&env)
 	graceFul(&env)

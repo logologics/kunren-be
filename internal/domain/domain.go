@@ -9,12 +9,14 @@ type Welcome struct {
 	Hello   string `json:"message"`
 }
 
+type ID string
+
 type Language string
 var Japanese Language = "ja"
 var English Language = "en"
 
 type Question struct {
-	ID int `json:"id"`
+	ID `json:"id"`
 	Question string `json:"q"`
 	Answer string `json:"a"`
 	Features []string `json:"fs"`
@@ -25,7 +27,7 @@ type Questions struct {
 }
 
 type User struct {
-	ID int `json:"id"`
+	ID `json:"id"`
 	Name string `json:"name"`
 	Languages []Language `json:"languages"`
 	Email string `json:"email"`
@@ -33,7 +35,7 @@ type User struct {
 }
 
 type Word struct {
-	ID int `json:"id"`
+	ID `json:"id"`
 	Key string `json:"key"`
 	Language Language `json:"language"`
 	Source string `json:"src"`
@@ -43,7 +45,7 @@ type Word struct {
 	
 
 type Lemma struct {
-	ID int `json:"id"`
+	ID `json:"id"`
 	Reading string `json:"reading"`
 	Lexeme string `json:"lexeme"`
 	Key string `json:"key"`
@@ -51,22 +53,22 @@ type Lemma struct {
 }
 
 type Meaning struct {
-	ID int `json:"id"`
+	ID `json:"id"`
 	POS []string `json:"pos"`
 	Translations []Translation `json:"translations"`
 }
 
 type Translation struct {
-	ID int `json:"id"`
+	ID `json:"id"`
 	Language Language `json:"language"`
 	Text string `json:"text"`
 }
 
 type Vocab struct {
-	ID int `json:"id"`
+	ID `json:"id"`
 	Language Language `json:"language"`
-	WordID int `json:"wordID"`
-	UserID int `json:"useID"`
+	WordID ID `json:"wordID"`
+	UserID ID `json:"useID"`
 	SearchStrings []string `json:"searchString"`
 	DateCreated time.Time `json:"dateCreated"`
 	DateSeen time.Time `json:"dateSeen"`
@@ -76,6 +78,6 @@ type Vocab struct {
 }
 
 type SearchResult struct {
-	Query string
-	Words[] Word
+	Query string `json:"query"`
+	Words[] Word `json:"words"`
 }

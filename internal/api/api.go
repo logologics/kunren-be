@@ -3,13 +3,16 @@ package api
 import (
 	"fmt"
 	"net/http"
-	d "github.com/logologics/kunren-be/internal/domain"
-	log "github.com/sirupsen/logrus"
 
+	d "github.com/logologics/kunren-be/internal/domain"
+	r "github.com/logologics/kunren-be/internal/repo"
+	mongo "github.com/logologics/kunren-be/internal/repo/mongo"
+	log "github.com/sirupsen/logrus"
 )
 
 type Env struct {
 	Config *d.Config
+	Repo   r.Repo
 }
 
 // AppHandlerFunc that return error
@@ -23,8 +26,12 @@ func (fn AppHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			v.sendError(w)
 		default:
 			errMsg := fmt.Sprintf("Unexpected error: %v", err)
-			log.WithFields(log.Fields{"loc":"ServeHttp", "msg": errMsg})
+			log.WithFields(log.Fields{"loc": "ServeHttp", "msg": errMsg})
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 	}
+}
+
+func CreateRepo(config *d.Config) (r.Repo, error) {
+	return &mongo.Mongo{}, nil
 }
