@@ -33,5 +33,13 @@ func makeRoutes(env *api.Env) []Route {
 			restEnv.GenerateRandomQuestions,
 			"application/json",
 		},
+		Route{
+			"Search Jisho",
+			"GET",
+			"/search/jisho/{query}",
+			restEnv.SearchJisho,
+			"application/json",
+		},
 	}
+
 }

@@ -2,16 +2,49 @@ package rest
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"github.com/gorilla/mux"
 
 	"github.com/logologics/kunren-be/internal/api"
 	d "github.com/logologics/kunren-be/internal/domain"
+	jisho "github.com/logologics/kunren-be/internal/extDict/jisho"
 )
 
 // Env is a local env type
 type Env api.Env
 
-// GenerateRandomQuestions returns the hanlder for GET /GenerateRandomQuestions
+
+
+// SearchJisho returns the handler for GET /search/jisho/{query}
+func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
+	vars := mux.Vars(r)
+	query := vars["query"]
+
+	sr, err := jisho.Search(query)
+	if err != nil {
+		return api.NewHttpInternalServerError(fmt.Sprintf("Something went wrong: %v", err))
+	}
+					
+	if err := json.NewEncoder(w).Encode(sr); err != nil {
+		return api.NewHttpBadRequest("Unexpected error in Index")
+	}
+	
+	return nil
+}
+
+// Remember stores a search result in the dict hostory
+func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+// Vocab returns a list of previously stored vovab items
+func (e *Env) Vocab(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+
+// GenerateRandomQuestions returns the handler for GET /GenerateRandomQuestions
 func (e *Env) GenerateRandomQuestions(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Access-Control-Allow-Origin", e.Config.KunrenFe)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
