@@ -1,4 +1,8 @@
 {
     "address" : ":9876",
-    "kunrenfe" : "http://localhost:3000"
+    "kunrenfe" : "http://localhost:3000",
+    "db" :{
+      "type": "mongodb",
+      "url": "mongodb://localhost:27017"
+    }
 }

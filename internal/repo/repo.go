@@ -12,10 +12,14 @@ const SortBySeen SortType = "seen"
 const SortByConfidence SortType = "conf"
 
 type Repo interface{
+	Disconnect() error
 	WordRepo
 	VocabRepo
 	UserRepo
 }
+
+
+
 
 // WordRepo is used to interact with word storage
 type WordRepo interface {
@@ -43,4 +47,5 @@ type VocabRepo interface {
 	DeleteVocab(d.ID) error
 	ListVocab(d.User, SortType ) ([]d.Vocab, error)
 }
+
 

@@ -32,6 +32,6 @@ func (fn AppHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateRepo(config *d.Config) (r.Repo, error) {
-	return &mongo.Mongo{}, nil
+func CreateRepo(c *d.Config) (r.Repo, error) {
+	return mongo.Connect(c)
 }
