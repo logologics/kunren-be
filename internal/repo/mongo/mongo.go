@@ -8,8 +8,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	mb "go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 	mlib "go.mongodb.org/mongo-driver/mongo"
 	mopt "go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -20,7 +19,7 @@ type Mongo struct {
 	client   *mlib.Client
 }
 
-// New creates a new Mongo Repo
+// Connect creates a new Mongo Repo
 func Connect(config *d.Config) (r.Repo, error) {
 	client, err := mlib.NewClient(mopt.Client().ApplyURI(config.DB.URL))
 	if err != nil {
@@ -49,28 +48,25 @@ func (m *Mongo) Disconnect() error {
 	return m.client.Disconnect(ctx)
 }
 
+func hasIndexes(ctx context.Context, iv mlib.IndexView) (bool, error) {
+	opts := mopt.ListIndexes().SetMaxTime(2 * time.Second)
+	cursor, err := iv.List(ctx, opts)
+	if err != nil {
+		return false, err
+	}
+
+	var results []bson.M
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		log.Fatal(err)
+	}
+
+	return len(results) > 0, nil
+}
+
 func (m *Mongo) initDB() error {
 	// create indexes
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err := createUserIndexes(ctx, m.kunrenDB)
 
-	userIdxs := m.kunrenDB.Collection("users").Indexes()
-	userIdxmodels := []mlib.IndexModel{
-		{
-			Keys:    mb.D{primitive.E{Key: "email", Value: 1}},
-			Options: mopt.Index().SetName("email_unique").SetUnique(true),
-		},
-		{
-			Keys: mb.D{primitive.E{Key: "name", Value: 1}, primitive.E{Key: "email", Value: 1}},
-			Options: mopt.Index().SetName("composite_name_email").SetUnique(true),
-		},
-	}
-
-	opts := mopt.CreateIndexes().SetMaxTime(2 * time.Second)
-	names, err := userIdxs.CreateMany(context.TODO(), userIdxmodels, opts)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("created indexes %v\n", names)
-
-	return nil
+	return err 
 }

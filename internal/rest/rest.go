@@ -18,7 +18,7 @@ type Env api.Env
 
 // RepoUser is temporarily used as the user
 // until we have authentication
-var RepoUser = d.User{ID: "1", Email: "alex@alex.com"}
+var RepoUser = d.User{Email: "alex@alex.com"}
 
 // SearchJisho returns the handler for GET /search/jisho/{query}
 func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
@@ -49,7 +49,7 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if err := json.Unmarshal(body, &word); err != nil {
-		return api.NewHttpInternalServerError("Can't unmarshal body")
+		return api.NewHttpInternalServerError(fmt.Sprintf("Can't unmarshal body: %err",err))
 	}
 
 	wordID, err := e.Repo.StoreWord(*word)

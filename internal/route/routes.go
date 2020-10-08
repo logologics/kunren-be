@@ -19,25 +19,32 @@ func makeRoutes(env *api.Env) []Route {
 	restEnv := rest.Env(*env)
 
 	return []Route{
-		Route{
+		{
 			"Index",
 			"GET",
 			"/",
 			restEnv.Index,
 			"",
 		},
-		Route{
+		{
 			"RandomQuestions",
 			"GET",
 			"/rq", // TODO request paras
 			restEnv.GenerateRandomQuestions,
 			"application/json",
 		},
-		Route{
+		{
 			"Search Jisho",
 			"GET",
 			"/search/jisho/{query}",
 			restEnv.SearchJisho,
+			"application/json",
+		},
+		{
+			"Remember Word",
+			"POST",
+			"/remember",
+			restEnv.Remember,
 			"application/json",
 		},
 	}
