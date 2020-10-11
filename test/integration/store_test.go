@@ -1,29 +1,28 @@
 package integration
 
 import (
-	"os"
-	"os/exec"
+	"context"
+	"fmt"
+	"log"
 	"testing"
 )
 
 // expects DB empty
 func TestStore(t *testing.T) {
-	deleteAllWordsFromDocker(t)
+	deleteAllWordsFromDockerCli(t)
+
 }
 
-// docker exec -ti some-mongo mongo /scripts/delete-words.js
-func deleteAllWordsFromDocker(t *testing.T) {
-	dockerExecutable, _ := exec.LookPath("docker")
-
-	cmd := &exec.Cmd{
-		Path:   dockerExecutable,
-		Args:   []string{dockerExecutable, "exec", "some-mongo", "mongo","/scripts/delete-words.js"},
-		Stdout: os.Stdout,
-		Stderr: os.Stdout,
+func deleteAllWordsFromDockerCli(t *testing.T) {
+	ctx := context.Background()
+	execID, err := DockerExec(ctx, "some-mongo", []string{"mongo", "/scripts/delete-words.js"})
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	// run `go version` command
-	if err := cmd.Run(); err != nil {
-		t.Errorf("Err %v", err)
+	execRes, err := DockerInspectExecResp(ctx, execID.ID)
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Printf("res |%v|\n", execRes)
+	t.Errorf("hi")
 }
