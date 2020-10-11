@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 
 	d "github.com/logologics/kunren-be/internal/domain"
@@ -10,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Env is the api env
 type Env struct {
 	Config *d.Config
 	Repo   r.Repo
@@ -22,16 +22,17 @@ type AppHandlerFunc func(http.ResponseWriter, *http.Request) error
 func (fn AppHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := fn(w, r); err != nil {
 		switch v := err.(type) {
-		case HttpError:
-			v.sendError(w)
+		case HTTPError:
+			log.WithFields(log.Fields{"loc": "ServeHttp", "err": v, "ctx": v.Context}).Error(v.Message)
+			v.SendError(w)
 		default:
-			errMsg := fmt.Sprintf("Unexpected error: %v", err)
-			log.WithFields(log.Fields{"loc": "ServeHttp", "msg": errMsg})
-			http.Error(w, errMsg, http.StatusInternalServerError)
+			log.WithFields(log.Fields{"loc": "ServeHttp", "err": err}).Error("Unexpected error")
+			http.Error(w, "Unexpected server error", http.StatusInternalServerError)
 		}
 	}
 }
 
+// CreateRepo creates a new repo (only mongo supported)
 func CreateRepo(c *d.Config) (r.Repo, error) {
 	return mongo.Connect(c)
 }

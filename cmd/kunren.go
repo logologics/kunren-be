@@ -18,7 +18,7 @@ func main() {
 
 	// log config
 	log.SetFormatter(&log.TextFormatter{
-		DisableColors: true,
+		DisableColors: false,
 	})
 
 	viper.SetConfigName("application")

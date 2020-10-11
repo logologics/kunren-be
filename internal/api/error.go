@@ -1,61 +1,33 @@
 package api
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 )
 
-// Internal HttpError
-type HttpError interface {
+// HTTPError encodes a http error
+type HTTPError struct {
 	error
-	getCode() int
-	sendError(w http.ResponseWriter)
+	Message string `json:"msg"`
+	Code    int    `json:"code"`
+	Context string 
 }
 
-//*********    httpBadRequest  *********//
-type httpBadRequest struct {
-	msg string
+// NewHTTPBadRequest creates a 400
+func NewHTTPBadRequest(err error, msg string, ctx string) HTTPError {
+	return HTTPError{err, msg, http.StatusBadRequest, ctx}
 }
 
-func NewHttpBadRequest(msg string) httpBadRequest {
-	return httpBadRequest{msg}
+// NewHTTPInternalServerError creates a 500
+func NewHTTPInternalServerError(err error, msg string, ctx string) HTTPError {
+	return HTTPError{err, msg, http.StatusInternalServerError, ctx}
 }
 
-func (badReq httpBadRequest) Error() string {
-	return string(http.StatusBadRequest)
-}
-
-func (badReq httpBadRequest) getCode() int {
-	return http.StatusBadRequest
-}
-func (badReq httpBadRequest) sendError(w http.ResponseWriter) {
+// SendError sends the error ti the writer
+func (httpErr HTTPError) SendError(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusBadRequest)
-	if err := json.NewEncoder(w).Encode(badReq); err != nil {
-		panic(err)
-	}
-}
-
-//*********    httpBadRequest  *********//
-type httpInternalServerError struct {
-	msg string
-}
-
-func NewHttpInternalServerError(msg string) httpInternalServerError {
-	return httpInternalServerError{msg}
-}
-
-func (intError httpInternalServerError) Error() string {
-	return string(http.StatusInternalServerError)
-}
-
-func (intError httpInternalServerError) getCode() int {
-	return http.StatusInternalServerError
-}
-func (intError httpInternalServerError) sendError(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusBadRequest)
-	if err := json.NewEncoder(w).Encode(intError); err != nil {
+	w.WriteHeader(httpErr.Code)
+	if err := json.NewEncoder(w).Encode(httpErr); err != nil {
 		panic(err)
 	}
 }

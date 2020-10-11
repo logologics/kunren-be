@@ -4,6 +4,10 @@ Kunren backend
 # mongo
 ```
 docker run --rm -p 27017:27017 --name some-mongo mongo:latest
+...
+docker exec -ti some-mongo bash
+mongo
+
 ```
 
 # remember

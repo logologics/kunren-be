@@ -2,7 +2,6 @@ package rest
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -27,7 +26,7 @@ func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
 
 	sr, err := jisho.Search(query)
 	if err != nil {
-		return api.NewHttpInternalServerError(fmt.Sprintf("Something went wrong: %v", err))
+		return api.NewHTTPInternalServerError(err, "Something went wrong", "rest searchJisho()")
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -41,18 +40,22 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return api.NewHttpBadRequest("Cant read body")
+		return api.NewHTTPBadRequest(err, "Cant read body", "rest - Remember()")
 	}
 
 	if err := r.Body.Close(); err != nil {
-		return api.NewHttpInternalServerError("Can't close body")
+		return api.NewHTTPInternalServerError(err, "Can't close body", "rest - Remember()")
 	}
 
 	if err := json.Unmarshal(body, &word); err != nil {
-		return api.NewHttpInternalServerError(fmt.Sprintf("Can't unmarshal body: %err",err))
+		return api.NewHTTPInternalServerError(err, "Can't unmarshal body", "rest - Remember()")
 	}
 
 	wordID, err := e.Repo.StoreWord(*word)
+	if err != nil {
+		return api.NewHTTPInternalServerError(err, "Can't store", "rest - Remember()")
+	}
+
 	vocab := d.Vocab{
 		WordID:        wordID,
 		UserID:        RepoUser.ID,
@@ -62,10 +65,10 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 	e.Repo.UpsertVocab(vocab)
 
 	w.WriteHeader(http.StatusOK)
-	return nil
+	return json.NewEncoder(w).Encode(wordID)
 }
 
-// Vocab returns a list of previously stored vovab items
+// Vocab returns a list of previously stored vocab items
 func (e *Env) Vocab(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
@@ -78,19 +81,19 @@ func (e *Env) GenerateRandomQuestions(w http.ResponseWriter, r *http.Request) er
 
 	qs := d.Questions{
 		Questions: []d.Question{
-			d.Question{
+			{
 				ID:       "1",
 				Question: "q1",
 				Answer:   "a1",
 				Features: []string{"plain", "past", "conditional", "hallo", "good morning"},
 			},
-			d.Question{
+			{
 				ID:       "2",
 				Question: "q2",
 				Answer:   "aa",
 				Features: []string{"plain", "past", "q2"},
 			},
-			d.Question{
+			{
 				ID:       "3",
 				Question: "q3",
 				Answer:   "a3",
@@ -102,14 +105,14 @@ func (e *Env) GenerateRandomQuestions(w http.ResponseWriter, r *http.Request) er
 	return json.NewEncoder(w).Encode(qs)
 }
 
-// Index returns the hanlder for GET /
+// Index returns the handler for GET /
 func (e *Env) Index(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	welcome := d.Welcome{Version: d.Version, Hello: "Wecome to Kunren!"}
+	welcome := d.Welcome{Version: d.Version, Hello: "Welcome to Kunren!"}
 	if err := json.NewEncoder(w).Encode(welcome); err != nil {
-		return api.NewHttpBadRequest("Unexpected error in Index")
+		return api.NewHTTPBadRequest(err, "Unexpected error in Index", "rest - index()")
 	}
 
 	return nil

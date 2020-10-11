@@ -1,0 +1,49 @@
+{
+  "id": 0,
+  "key": "家庭",
+  "language": "ja",
+  "src": "jisho",
+  "dateCreated": "2020-10-04T17:58:22.03134+02:00",
+  "reading": "かてい",
+  "lexeme": "家庭",
+  "meanings": [
+    {
+      "id": 0,
+      "pos": [
+        "AK",
+        "Noun",
+        "No-adjective"
+      ],
+      "translations": [
+        {
+          "id": 0,
+          "language": "en",
+          "text": "homo"
+        },
+        {
+          "id": 0,
+          "language": "en",
+          "text": "family"
+        },
+        {
+          "id": 0,
+          "language": "en",
+          "text": "household"
+        }
+      ]
+    },
+    {
+      "id": 0,
+      "pos": [
+        "Wikipedia definition"
+      ],
+      "translations": [
+        {
+          "id": 0,
+          "language": "en",
+          "text": "Home"
+        }
+      ]
+    }
+  ]
+}

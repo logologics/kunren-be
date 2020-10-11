@@ -13,10 +13,13 @@ import (
 	mopt "go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const timeout = 100 * time.Second
+
 // Mongo is a implementation of Repos using MongoDB backend
 type Mongo struct {
 	kunrenDB *mlib.Database
 	client   *mlib.Client
+	timeout  time.Duration
 }
 
 // Connect creates a new Mongo Repo
@@ -25,7 +28,7 @@ func Connect(config *d.Config) (r.Repo, error) {
 	if err != nil {
 		return &Mongo{}, nil
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	err = client.Connect(ctx)
 	if err != nil {
 		return &Mongo{}, nil
@@ -33,7 +36,7 @@ func Connect(config *d.Config) (r.Repo, error) {
 
 	kunrenDb := client.Database("kunren")
 
-	m := &Mongo{client: client, kunrenDB: kunrenDb}
+	m := &Mongo{client: client, kunrenDB: kunrenDb, timeout: timeout}
 	err = m.initDB()
 	if err != nil {
 		return &Mongo{}, err
@@ -44,7 +47,7 @@ func Connect(config *d.Config) (r.Repo, error) {
 
 // Disconnect disconnects
 func (m *Mongo) Disconnect() error {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), m.timeout)
 	return m.client.Disconnect(ctx)
 }
 
@@ -65,8 +68,8 @@ func hasIndexes(ctx context.Context, iv mlib.IndexView) (bool, error) {
 
 func (m *Mongo) initDB() error {
 	// create indexes
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), m.timeout)
 	err := createUserIndexes(ctx, m.kunrenDB)
 
-	return err 
+	return err
 }

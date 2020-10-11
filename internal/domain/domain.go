@@ -1,8 +1,11 @@
 package domain
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
+	hsh "github.com/mitchellh/hashstructure"
 	mp "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -43,6 +46,7 @@ type Word struct {
 	Source      string      `json:"src" bson:"src,omitempty"`
 	DateCreated time.Time   `json:"dateCreated" bson:"dateCreated,omitempty"`
 	Lemma
+	LemmaHash string `bson:"lhash"`
 }
 
 type Lemma struct {
@@ -50,6 +54,16 @@ type Lemma struct {
 	Lexeme   string    `json:"lexeme"`
 	Key      string    `json:"key"`
 	Meanings []Meaning `json:"meanings"`
+}
+
+// Hash calculates the Lemma's hash
+func (l Lemma) Hash() (string, error) {
+	h, err := hsh.Hash(l, nil)
+	if err != nil {
+		return "", fmt.Errorf("Could not calculate hash for %v", l.Key)
+	}
+
+	return strconv.FormatUint(h, 10), nil
 }
 
 type Meaning struct {
