@@ -13,6 +13,7 @@ import (
 type Env struct {
 	Config *d.Config
 	Repo   r.Repo
+	d.User
 }
 
 // AppHandlerFunc that return error

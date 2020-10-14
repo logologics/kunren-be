@@ -77,15 +77,15 @@ type Translation struct {
 }
 
 type Vocab struct {
-	ID            mp.ObjectID `json:"id"`
-	Language      Language    `json:"language"`
-	WordID        mp.ObjectID `json:"wordID"`
-	UserID        mp.ObjectID `json:"useID"`
-	SearchStrings []string    `json:"searchString"`
-	DateCreated   time.Time   `json:"dateCreated"`
-	DateSeen      time.Time   `json:"dateSeen"`
-	Seen          int         `json:"seen"`
-	Confidence    int         `json:"confidence"`
+	ID            mp.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Language      Language    `json:"language" bson:"language,omitempty"`
+	WordID        mp.ObjectID `json:"wordID" bson:"wordID,omitempty"`
+	UserID        mp.ObjectID `json:"userID" bson:"userID,omitempty"`
+	SearchStrings []string    `json:"searchString" bson:"searchString,omitempty"`
+	DateCreated   time.Time   `json:"dateCreated" bson:"dateCreated,omitempty"`
+	DateSeen      time.Time   `json:"dateSeen" bson:"dateSeen,omitempty"`
+	Seen          int         `json:"seen" bson:"seen,omitempty"`
+	Confidence    int         `json:"confidence" bson:"confidence,omitempty"`
 }
 
 type SearchResult struct {

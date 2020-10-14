@@ -12,7 +12,7 @@ mongo
 
 # remember
 ```
-curl -vX POST -H 'contenttype: application/json' --data-binary @resource/words/jisho.home.json localhost:9876/remember
+curl -vX POST -H 'contenttype: application/json' --data-binary @resource/words/word.home.json localhost:9876/remember
 ```
 
 # search

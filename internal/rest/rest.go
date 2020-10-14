@@ -10,14 +10,11 @@ import (
 	"github.com/logologics/kunren-be/internal/api"
 	d "github.com/logologics/kunren-be/internal/domain"
 	jisho "github.com/logologics/kunren-be/internal/extDict/jisho"
+	"github.com/logologics/kunren-be/internal/repo"
 )
 
 // Env is a local env type
 type Env api.Env
-
-// RepoUser is temporarily used as the user
-// until we have authentication
-var RepoUser = d.User{Email: "alex@alex.com"}
 
 // SearchJisho returns the handler for GET /search/jisho/{query}
 func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
@@ -34,9 +31,20 @@ func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
 	return json.NewEncoder(w).Encode(sr)
 }
 
-// Remember stores a search result in the dict hostory
+// Vocabs returns all vocabs for the user
+func (e *Env) Vocabs(w http.ResponseWriter, r *http.Request) error {
+	vocabs, err := e.Repo.ListVocabs(e.User, repo.SortBySeen)
+	if err != nil {
+		return api.NewHTTPInternalServerError(err, "Can't close body", "rest - Remember()")
+	}
+	
+	w.WriteHeader(http.StatusOK)
+	return json.NewEncoder(w).Encode(vocabs)
+}
+
+// Remember stores a search result in the dict history
 func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
-	word := &d.Word{}
+	word := d.Word{}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -51,21 +59,24 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 		return api.NewHTTPInternalServerError(err, "Can't unmarshal body", "rest - Remember()")
 	}
 
-	wordID, err := e.Repo.StoreWord(*word)
+	storedWord, err := e.Repo.StoreWord(word)
 	if err != nil {
 		return api.NewHTTPInternalServerError(err, "Can't store", "rest - Remember()")
 	}
 
 	vocab := d.Vocab{
-		WordID:        wordID,
-		UserID:        RepoUser.ID,
+		WordID:        storedWord.ID,
+		UserID:        e.User.ID,
 		Language:      word.Language,
-		SearchStrings: []string{},
+		SearchStrings: []string{storedWord.Key, storedWord.Lemma.Reading},
 	}
-	e.Repo.UpsertVocab(vocab)
+	_, err = e.Repo.StoreVocab(vocab, true)
+	if err != nil {
+		return api.NewHTTPInternalServerError(err, "Can't create vocab", "rest - Remember()")
+	}
 
 	w.WriteHeader(http.StatusOK)
-	return json.NewEncoder(w).Encode(wordID)
+	return json.NewEncoder(w).Encode(storedWord.ID)
 }
 
 // Vocab returns a list of previously stored vocab items

@@ -5,34 +5,29 @@ import (
 	mp "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-
 type SortType string
 
 const SortBySeen SortType = "seen"
 const SortByConfidence SortType = "conf"
 
-type Repo interface{
+type Repo interface {
 	Disconnect() error
 	WordRepo
 	VocabRepo
 	UserRepo
 }
 
-
-
-
 // WordRepo is used to interact with word storage
 type WordRepo interface {
-	StoreWord(d.Word) (mp.ObjectID, error)
+	StoreWord(d.Word) (d.Word, error)
 	LoadWord(mp.ObjectID) (d.Word, error)
-	UpdateWord(d.Word) error
 	DeleteWord(mp.ObjectID) error
 	ListWords() ([]d.Word, error)
 }
 
 // UserRepo is used to interact with user storage
 type UserRepo interface {
-	StoreUser(d.User) (mp.ObjectID, error)
+	StoreUser(d.User) (d.User, error)
 	LoadUser(mp.ObjectID) (d.User, error)
 	UpdateUser(d.User) error
 	DeleteUser(mp.ObjectID) error
@@ -40,12 +35,8 @@ type UserRepo interface {
 
 // VocabRepo is used to interact with vocab storage
 type VocabRepo interface {
-	StoreVocab(d.Vocab) (mp.ObjectID, error)
+	StoreVocab(d.Vocab, bool) (d.Vocab, error)
 	LoadVocab(mp.ObjectID) (d.Vocab, error)
-	UpdateVocab(d.Vocab) error
-	UpsertVocab(d.Vocab) (mp.ObjectID, error)
 	DeleteVocab(mp.ObjectID) error
-	ListVocab(d.User, SortType ) ([]d.Vocab, error)
+	ListVocabs(d.User, SortType) ([]d.Vocab, error)
 }
-
-

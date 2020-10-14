@@ -47,6 +47,12 @@ func makeRoutes(env *api.Env) []Route {
 			restEnv.Remember,
 			"application/json",
 		},
+		{
+			"Get Vocabs",
+			"GET",
+			"/vocabs",
+			restEnv.Vocabs,
+			"",
+		},
 	}
-
 }

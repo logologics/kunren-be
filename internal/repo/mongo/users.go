@@ -13,8 +13,8 @@ import (
 )
 
 // StoreUser bla
-func (mongo *Mongo) StoreUser(d.User) (mp.ObjectID, error) {
-	return mp.ObjectID{}, nil
+func (mongo *Mongo) StoreUser(d.User) (d.User, error) {
+	return d.User{}, nil
 }
 
 // LoadUser bla

@@ -9,6 +9,8 @@ import (
 	"github.com/logologics/kunren-be/internal/route"
 	"github.com/logologics/kunren-be/internal/api"
 	d "github.com/logologics/kunren-be/internal/domain"
+	mp "go.mongodb.org/mongo-driver/bson/primitive"
+
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -34,7 +36,15 @@ func main() {
 	if err != nil {
 		log.Fatal("Can't create repo: %v", err)
 	}
-	env := api.Env{Config: config, Repo: repo}
+
+	uID, err := mp.ObjectIDFromHex("000000000000000000000005")
+	if err != nil {
+		log.Fatal("Can't create default suer: %v", err)
+	}
+
+	u := d.User{Email: "alex@alex.com", ID: uID}
+
+	env := api.Env{Config: config, Repo: repo, User: u}
 
 	mux := route.NewRestRouter(&env)
 	graceFul(&env)

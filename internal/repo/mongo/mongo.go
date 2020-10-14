@@ -1,6 +1,8 @@
 package mongo
 
 import (
+	"fmt"
+
 	d "github.com/logologics/kunren-be/internal/domain"
 	r "github.com/logologics/kunren-be/internal/repo"
 
@@ -9,6 +11,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	mp "go.mongodb.org/mongo-driver/bson/primitive"
 	mlib "go.mongodb.org/mongo-driver/mongo"
 	mopt "go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -73,3 +76,78 @@ func (m *Mongo) initDB() error {
 
 	return err
 }
+
+func (m *Mongo) delete(collection *mlib.Collection, id mp.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
+	defer cancel()
+
+	// ## find
+	dRes, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+	if err != nil {
+		return err
+	}
+
+	if dRes.DeletedCount == 1 {
+		log.Info(fmt.Sprintf("Vocab with id %v deleted", id))
+	}
+
+	return nil
+}
+func (m *Mongo) load(collection *mlib.Collection, id mp.ObjectID, target interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
+	defer cancel()
+
+	// ## find
+	fRes := collection.FindOne(ctx, bson.M{"_id": id})
+	fResErr := fRes.Err()
+
+	if fResErr != nil && fResErr != mlib.ErrNoDocuments {
+		return fRes.Err()
+	}
+
+	// # if not found 1
+	if fResErr != nil {
+		return fmt.Errorf("Could not find vocab with id  %v", id)
+	}
+
+	// ## decode
+	err := fRes.Decode(target)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+/*
+func Paginate(collection *mongo.Collection, startValue objectid.ObjectID, nPerPage int64) ([]bson.Document, *bson.Value, error) {
+
+	// Query range filter using the default indexed _id field. 
+	filter := bson.VC.DocumentFromElements(
+			bson.EC.SubDocumentFromElements(
+					"_id",
+					bson.EC.ObjectID("$gt", startValue),
+			),
+	)
+
+	var opts []findopt.Find
+	opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("_id", -1))))
+	opts = append(opts, findopt.Limit(nPerPage))
+
+	cursor, _ := collection.Find(context.Background(), filter, opts...)
+
+	var lastValue *bson.Value
+	var results []bson.Document
+	for cursor.Next(context.Background()) {
+			elem := bson.NewDocument()
+			err := cursor.Decode(elem)
+			if err != nil {
+					return results, lastValue, err
+			}
+			results = append(results, *elem)
+			lastValue = elem.Lookup("_id")
+	}
+
+	return results, lastValue, nil
+}
+*/

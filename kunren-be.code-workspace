@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"name": "kunren-be",
+			"path": "."
+		}
+	],
+  "settings": {
+    "cSpell.words": [
+      "Idxmodels",
+      "Idxs",
+      "kunrenfe",
+      "mlib",
+      "mongodb",
+      "mopt"
+    ]
+  }
+}
