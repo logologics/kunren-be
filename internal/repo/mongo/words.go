@@ -3,11 +3,14 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"time"
 
 	d "github.com/logologics/kunren-be/internal/domain"
+	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	mp "go.mongodb.org/mongo-driver/bson/primitive"
 	mlib "go.mongodb.org/mongo-driver/mongo"
+	mopt "go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (mongo *Mongo) wordsCollection() *mlib.Collection {
@@ -71,7 +74,7 @@ func (mongo *Mongo) StoreWord(word d.Word) (d.Word, error) {
 		return d.Word{}, err
 	}
 
-	fmt.Printf("New word with id %v created", iRes.InsertedID.(mp.ObjectID))
+	log.Printf("New word with id %v created\n", iRes.InsertedID.(mp.ObjectID))
 	return word, nil
 }
 
@@ -94,4 +97,36 @@ func (mongo *Mongo) DeleteWord(id mp.ObjectID) error {
 // ListWords lists all words in the dict
 func (mongo *Mongo) ListWords() ([]d.Word, error) {
 	return nil, nil
+}
+
+func createWordsIndexes(ctx context.Context, db *mlib.Database) error {
+	wordsIdxs := db.Collection("words").Indexes()
+	hasIdx, err := hasIndexes(ctx, wordsIdxs)
+	if err != nil {
+		return err
+	}
+	if hasIdx {
+		return nil
+	}
+
+	wordsIdxmodels := []mlib.IndexModel{
+		{
+			Keys:    bson.D{mp.E{Key: "key", Value: 1}},
+			Options: mopt.Index().SetName("words_key"),
+		},
+		{
+			Keys:    bson.D{mp.E{Key: "key", Value: 1}, mp.E{Key: "language", Value: 1}},
+			Options: mopt.Index().SetName("words_composite_user_word").SetUnique(true),
+		},
+	}
+
+	copts := mopt.CreateIndexes().SetMaxTime(2 * time.Second)
+	names, err := wordsIdxs.CreateMany(context.TODO(), wordsIdxmodels, copts)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("created indexes on words: %v\n", names)
+
+	return nil
 }

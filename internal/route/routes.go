@@ -9,7 +9,8 @@ import (
 type Route struct {
 	Name        string
 	Method      string
-	Pattern     string
+	Path        string
+	Queries     []string
 	HandlerFunc api.AppHandlerFunc
 	AcceptCT    string
 }
@@ -23,6 +24,7 @@ func makeRoutes(env *api.Env) []Route {
 			"Index",
 			"GET",
 			"/",
+			[]string{},
 			restEnv.Index,
 			"",
 		},
@@ -30,6 +32,7 @@ func makeRoutes(env *api.Env) []Route {
 			"RandomQuestions",
 			"GET",
 			"/rq", // TODO request paras
+			[]string{},
 			restEnv.GenerateRandomQuestions,
 			"application/json",
 		},
@@ -37,6 +40,7 @@ func makeRoutes(env *api.Env) []Route {
 			"Search Jisho",
 			"GET",
 			"/search/jisho/{query}",
+			[]string{},
 			restEnv.SearchJisho,
 			"application/json",
 		},
@@ -44,14 +48,16 @@ func makeRoutes(env *api.Env) []Route {
 			"Remember Word",
 			"POST",
 			"/remember",
-			restEnv.Remember,
+			[]string{},
+			restEnv.CheckRepo(restEnv.Remember),
 			"application/json",
 		},
 		{
 			"Get Vocabs",
 			"GET",
 			"/vocabs",
-			restEnv.Vocabs,
+			[]string{"k", "{key}"},
+			restEnv.CheckRepo(restEnv.Vocabs),
 			"",
 		},
 	}

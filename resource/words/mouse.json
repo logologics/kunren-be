@@ -1,0 +1,57 @@
+{
+  "_id": "000000000000000000000000",
+  "key": "鼠",
+  "language": "ja",
+  "src": "jisho",
+  "dateCreated": "2020-10-22T23:48:28.075528+02:00",
+  "reading": "ねずみ",
+  "lexeme": "鼠",
+  "meanings": [
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "mouse"
+        },
+        {
+          "language": "en",
+          "text": "rat"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "dark gray"
+        },
+        {
+          "language": "en",
+          "text": "dark grey"
+        },
+        {
+          "language": "en",
+          "text": "slate (color, colour)"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Wikipedia definition"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "Muroidea"
+        }
+      ]
+    }
+  ],
+  "LemmaHash": ""
+}

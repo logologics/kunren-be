@@ -6,15 +6,17 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/logologics/kunren-be/internal/api"
 	d "github.com/logologics/kunren-be/internal/domain"
 	jisho "github.com/logologics/kunren-be/internal/extDict/jisho"
-	"github.com/logologics/kunren-be/internal/repo"
 )
 
 // Env is a local env type
 type Env api.Env
+
+var pageSize = 10
 
 // SearchJisho returns the handler for GET /search/jisho/{query}
 func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
@@ -33,11 +35,14 @@ func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
 
 // Vocabs returns all vocabs for the user
 func (e *Env) Vocabs(w http.ResponseWriter, r *http.Request) error {
-	vocabs, err := e.Repo.ListVocabs(e.User, repo.SortBySeen)
+	key := mux.Vars(r)["key"]
+	log.Infof("Key %v", key)
+
+	vocabs, err := e.Repo.ListVocabs(key, pageSize, e.User)
 	if err != nil {
 		return api.NewHTTPInternalServerError(err, "Can't close body", "rest - Remember()")
 	}
-	
+
 	w.WriteHeader(http.StatusOK)
 	return json.NewEncoder(w).Encode(vocabs)
 }
@@ -65,6 +70,7 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	vocab := d.Vocab{
+		Key:           storedWord.Key,
 		WordID:        storedWord.ID,
 		UserID:        e.User.ID,
 		Language:      word.Language,
@@ -77,11 +83,6 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 
 	w.WriteHeader(http.StatusOK)
 	return json.NewEncoder(w).Encode(storedWord.ID)
-}
-
-// Vocab returns a list of previously stored vocab items
-func (e *Env) Vocab(w http.ResponseWriter, r *http.Request) error {
-	return nil
 }
 
 // GenerateRandomQuestions returns the handler for GET /GenerateRandomQuestions

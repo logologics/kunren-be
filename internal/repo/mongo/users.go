@@ -45,11 +45,11 @@ func createUserIndexes(ctx context.Context, db *mlib.Database) error {
 	userIdxmodels := []mlib.IndexModel{
 		{
 			Keys:    bson.D{mp.E{Key: "email", Value: 1}},
-			Options: mopt.Index().SetName("email_unique").SetUnique(true),
+			Options: mopt.Index().SetName("users_email_unique").SetUnique(true),
 		},
 		{
 			Keys:    bson.D{mp.E{Key: "name", Value: 1}, mp.E{Key: "email", Value: 1}},
-			Options: mopt.Index().SetName("composite_name_email").SetUnique(true),
+			Options: mopt.Index().SetName("users_composite_name_email").SetUnique(true),
 		},
 	}
 

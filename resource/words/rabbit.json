@@ -1,0 +1,49 @@
+{
+  "key": "兎",
+  "language": "ja",
+  "src": "jisho",
+  "dateCreated": "2020-10-22T23:48:40.956223+02:00",
+  "reading": "うさぎ",
+  "lexeme": "兎",
+  "meanings": [
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "rabbit"
+        },
+        {
+          "language": "en",
+          "text": "hare"
+        },
+        {
+          "language": "en",
+          "text": "coney"
+        },
+        {
+          "language": "en",
+          "text": "cony"
+        },
+        {
+          "language": "en",
+          "text": "lagomorph (esp. leporids)"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Wikipedia definition"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "Rabbit"
+        }
+      ]
+    }
+  ],
+  "LemmaHash": ""
+}

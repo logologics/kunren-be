@@ -1,0 +1,93 @@
+{
+  "_id": "000000000000000000000000",
+  "key": "猫",
+  "language": "ja",
+  "src": "jisho",
+  "dateCreated": "2020-10-22T23:48:14.395385+02:00",
+  "reading": "ねこ",
+  "lexeme": "猫",
+  "meanings": [
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "cat (esp. the domestic cat, Felis catus)"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "shamisen"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "geisha"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "wheelbarrow"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "clay bed-warmer"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Noun"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "bottom"
+        },
+        {
+          "language": "en",
+          "text": "submissive partner of a homosexual relationship"
+        }
+      ]
+    },
+    {
+      "pos": [
+        "Wikipedia definition"
+      ],
+      "translations": [
+        {
+          "language": "en",
+          "text": "Cat"
+        }
+      ]
+    }
+  ],
+  "LemmaHash": ""
+}

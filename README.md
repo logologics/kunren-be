@@ -19,3 +19,8 @@ curl -vX POST -H 'contenttype: application/json' --data-binary @resource/words/w
 ```
 curl -H "ContentType: application/json" localhost:9876/search/jisho/home
 ```
+
+# list vocab
+```
+curl -H "ContentType: application/json" localhost:9876/vocabs
+```

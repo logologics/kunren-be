@@ -16,7 +16,7 @@ type Env struct {
 	d.User
 }
 
-// AppHandlerFunc that return error
+// AppHandlerFunc that returns error
 type AppHandlerFunc func(http.ResponseWriter, *http.Request) error
 
 // ServeHTTP calls

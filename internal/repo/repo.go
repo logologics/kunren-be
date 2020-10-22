@@ -12,6 +12,7 @@ const SortByConfidence SortType = "conf"
 
 type Repo interface {
 	Disconnect() error
+	Ready() bool
 	WordRepo
 	VocabRepo
 	UserRepo
@@ -38,5 +39,5 @@ type VocabRepo interface {
 	StoreVocab(d.Vocab, bool) (d.Vocab, error)
 	LoadVocab(mp.ObjectID) (d.Vocab, error)
 	DeleteVocab(mp.ObjectID) error
-	ListVocabs(d.User, SortType) ([]d.Vocab, error)
+	ListVocabs(key string, pageSize int, u d.User) ([]d.VocabListItem, error)
 }

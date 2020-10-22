@@ -6,11 +6,11 @@ import (
 	"time"
 
 	d "github.com/logologics/kunren-be/internal/domain"
-	r "github.com/logologics/kunren-be/internal/repo"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	mp "go.mongodb.org/mongo-driver/bson/primitive"
 	mlib "go.mongodb.org/mongo-driver/mongo"
+	mopt "go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (mongo *Mongo) vocabsCollection() *mlib.Collection {
@@ -69,7 +69,7 @@ func (mongo *Mongo) StoreVocab(v d.Vocab, inc bool) (d.Vocab, error) {
 		return d.Vocab{}, err
 	}
 
-	log.Info(fmt.Sprintf("New vocab with id %v created", iRes.InsertedID))
+	log.Infof("New vocab with id %v created\n", iRes.InsertedID)
 	return v, nil
 
 }
@@ -92,29 +92,103 @@ func (mongo *Mongo) DeleteVocab(id mp.ObjectID) error {
 }
 
 // ListVocabs lists all Vocabs + words of the user
-func (mongo *Mongo) ListVocabs(u d.User, st r.SortType) ([]d.Vocab, error) {
+func (mongo *Mongo) ListVocabs(key string, pageSize int, u d.User) ([]d.VocabListItem, error) {
+
 	ctx, cancel := context.WithTimeout(context.Background(), mongo.timeout)
 	defer cancel()
 
-	
-		lookupStage := bson.D{
-			{"$lookup", bson.D{
-				{"from", "words"}, {"localField", "wordID"}, {"foreignField", "_id"}, {"as", "word"}}}}
+	matchStage := bson.D{
+		{
+			Key: "$match",
+			Value: mp.M{
+				"key":    mp.M{"$gt": key},
+				"userID": u.ID,
+			},
+		},
+	}
 
-		unwindStage := bson.D{
-			{"$unwind", bson.D{{"path", "$word"}, {"preserveNullAndEmptyArrays", false}}}}
-	
+	limitStage := bson.D{
+		{
+			Key:   "$limit",
+			Value: pageSize,
+		},
+	}
 
-	showLoadedCursor, err := mongo.vocabsCollection().Aggregate(
-		ctx, mlib.Pipeline{lookupStage, unwindStage})
+	lookupStage := bson.D{
+		{
+			Key: "$lookup",
+			Value: bson.D{
+				{Key: "from", Value: "words"},
+				{Key: "localField", Value: "wordID"},
+				{Key: "foreignField", Value: "_id"},
+				{Key: "as", Value: "word"},
+			},
+		},
+	}
 
+	unwindStage := bson.D{
+		{
+			Key: "$unwind",
+			Value: bson.D{
+				{Key: "path", Value: "$word"},
+				{Key: "preserveNullAndEmptyArrays", Value: false},
+			},
+		},
+	}
+
+	//{ $replaceWith: { $mergeObjects: [ { _id: "$_id", first: "", last: "" }, "$name" ] } }
+
+	cur, err := mongo.vocabsCollection().Aggregate(
+		ctx, mlib.Pipeline{matchStage, limitStage, lookupStage, unwindStage},
+	)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	var showsLoaded []bson.M
-	if err = showLoadedCursor.All(ctx, &showsLoaded); err != nil {
-		panic(err)
+	var vocabs []bson.M
+	if err = cur.All(ctx, &vocabs); err != nil {
+		return nil, err
 	}
-	log.Println(showsLoaded)
-	return []d.Vocab{}, nil
+
+	log.Infof("git %v", vocabs)
+	if vocabs == nil {
+		return []d.VocabListItem{}, nil
+	}
+
+	return []d.VocabListItem{}, nil
+}
+
+func createVocabsIndexes(ctx context.Context, db *mlib.Database) error {
+	vocabsIdxs := db.Collection("vocabs").Indexes()
+	hasIdx, err := hasIndexes(ctx, vocabsIdxs)
+	if err != nil {
+		return err
+	}
+	if hasIdx {
+		return nil
+	}
+
+	vocabsIdxmodels := []mlib.IndexModel{
+		{
+			Keys:    bson.D{mp.E{Key: "key", Value: 1}},
+			Options: mopt.Index().SetName("vocabs_key"),
+		},
+		{
+			Keys:    bson.D{mp.E{Key: "searchStrings", Value: 1}},
+			Options: mopt.Index().SetName("vocabs_search_strings"),
+		},
+		{
+			Keys:    bson.D{mp.E{Key: "wordID", Value: 1}, mp.E{Key: "userID", Value: 1}},
+			Options: mopt.Index().SetName("vocabs_composite_user_word").SetUnique(true),
+		},
+	}
+
+	copts := mopt.CreateIndexes().SetMaxTime(2 * time.Second)
+	names, err := vocabsIdxs.CreateMany(context.TODO(), vocabsIdxmodels, copts)
+	if err != nil {
+		return err
+	}
+
+	log.Infof("created indexes on vocabs: %v\n", names)
+
+	return nil
 }

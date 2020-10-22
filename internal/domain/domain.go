@@ -81,14 +81,20 @@ type Vocab struct {
 	Language      Language    `json:"language" bson:"language,omitempty"`
 	WordID        mp.ObjectID `json:"wordID" bson:"wordID,omitempty"`
 	UserID        mp.ObjectID `json:"userID" bson:"userID,omitempty"`
-	SearchStrings []string    `json:"searchString" bson:"searchString,omitempty"`
+	SearchStrings []string    `json:"searchString" bson:"searchStrings,omitempty"`
 	DateCreated   time.Time   `json:"dateCreated" bson:"dateCreated,omitempty"`
 	DateSeen      time.Time   `json:"dateSeen" bson:"dateSeen,omitempty"`
 	Seen          int         `json:"seen" bson:"seen,omitempty"`
 	Confidence    int         `json:"confidence" bson:"confidence,omitempty"`
+	Key           string      `json:"key" bson:"key,omitempty"`
 }
 
 type SearchResult struct {
 	Query string `json:"query"`
 	Words []Word `json:"words"`
+}
+
+type VocabListItem struct {
+	Vocab `json:"key" bson:"vocab,omitempty"`
+	Word `json:"key" bson:"word,omitempty"`
 }
