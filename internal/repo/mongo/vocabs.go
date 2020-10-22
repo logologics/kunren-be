@@ -136,15 +136,13 @@ func (mongo *Mongo) ListVocabs(key string, pageSize int, u d.User) ([]d.VocabLis
 		},
 	}
 
-	//{ $replaceWith: { $mergeObjects: [ { _id: "$_id", first: "", last: "" }, "$name" ] } }
-
 	cur, err := mongo.vocabsCollection().Aggregate(
 		ctx, mlib.Pipeline{matchStage, limitStage, lookupStage, unwindStage},
 	)
 	if err != nil {
 		return nil, err
 	}
-	var vocabs []bson.M
+	var vocabs []d.VocabListItem
 	if err = cur.All(ctx, &vocabs); err != nil {
 		return nil, err
 	}
@@ -154,7 +152,7 @@ func (mongo *Mongo) ListVocabs(key string, pageSize int, u d.User) ([]d.VocabLis
 		return []d.VocabListItem{}, nil
 	}
 
-	return []d.VocabListItem{}, nil
+	return vocabs, nil
 }
 
 func createVocabsIndexes(ctx context.Context, db *mlib.Database) error {

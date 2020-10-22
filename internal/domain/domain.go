@@ -95,6 +95,6 @@ type SearchResult struct {
 }
 
 type VocabListItem struct {
-	Vocab `json:"key" bson:"vocab,omitempty"`
-	Word `json:"key" bson:"word,omitempty"`
+	Vocab 
+	Word Word `json:"key" bson:"word,omitempty"`
 }
