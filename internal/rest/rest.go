@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -40,7 +41,27 @@ func (e *Env) Vocabs(w http.ResponseWriter, r *http.Request) error {
 
 	vocabs, err := e.Repo.ListVocabs(key, pageSize, e.User)
 	if err != nil {
-		return api.NewHTTPInternalServerError(err, "Can't close body", "rest - Remember()")
+		return api.NewHTTPInternalServerError(err, "Error retrieving Vocabs", "rest - Vocabs()")
+	}
+
+	w.WriteHeader(http.StatusOK)
+	return json.NewEncoder(w).Encode(vocabs)
+}
+
+// FindVocab returns the vocab with the given key and language
+func (e *Env) FindVocab(w http.ResponseWriter, r *http.Request) error {
+	key := mux.Vars(r)["key"]
+	lang := mux.Vars(r)["lang"]
+	check, _ := strconv.ParseBool(mux.Vars(r)["check"])
+	log.Infof("Lang/Key/`check %v/%v/%v", lang, key)
+
+	vocabs, err := e.Repo.FindVocab(e.User, d.ToLanguage(lang), key)
+	if err != nil && check {
+		return json.NewEncoder(w).Encode(d.Message{Status: 404, Message: "Not found"})
+	}
+
+	if err != nil {
+		return api.NewNotFound(err, "Error retrieving Vocab", "rest - FindVocab()")
 	}
 
 	w.WriteHeader(http.StatusOK)

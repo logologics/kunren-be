@@ -39,8 +39,8 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Search Jisho",
 			"GET",
-			"/search/jisho/{query}",
-			[]string{},
+			"/search/jisho",
+			[]string{"q", "{query}"},
 			restEnv.SearchJisho,
 			"application/json",
 		},
@@ -58,6 +58,22 @@ func makeRoutes(env *api.Env) []Route {
 			"/vocabs",
 			[]string{"k", "{key}"},
 			restEnv.CheckRepo(restEnv.Vocabs),
+			"",
+		},
+		{
+			"Find Vocab (but only check)",
+			"GET",
+			"/vocabs/find",
+			[]string{"k", "{key}", "l", "{lang}", "c", "{check:true|false}"},
+			restEnv.CheckRepo(restEnv.FindVocab),
+			"",
+		},
+		{
+			"Find Vocab",
+			"GET",
+			"/vocabs/find",
+			[]string{"k", "{key}", "l", "{lang}"},
+			restEnv.CheckRepo(restEnv.FindVocab),
 			"",
 		},
 	}

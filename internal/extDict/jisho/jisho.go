@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	d "github.com/logologics/kunren-be/internal/domain"
+	log "github.com/sirupsen/logrus"
 )
 
 var jishoSearchAPIURL = "https://jisho.org/api/v1/search/words?keyword="
@@ -21,8 +23,23 @@ var httpClient = &http.Client{
 	},
 	Timeout: timeOut}
 
+// Search searches for words on jisho.org
 func Search(query string) (d.SearchResult, error) {
-	r, err := httpClient.Get(jishoSearchAPIURL + query)
+	log.Infof("Query %s", jishoSearchAPIURL+query)
+
+	jisho, err := url.Parse("https://jisho.org")
+	if err != nil {
+		return d.SearchResult{}, err
+	}
+
+	jisho.Path = "api/v1/search/words"
+
+	params := url.Values{}
+	params.Add("keyword", query)
+
+	jisho.RawQuery = params.Encode()
+
+	r, err := httpClient.Get(jisho.String())
 	if err != nil {
 		return d.SearchResult{}, err
 	}
@@ -38,6 +55,7 @@ func Search(query string) (d.SearchResult, error) {
 	if err != nil {
 		return d.SearchResult{}, err
 	}
+
 	return Convert(body)
 
 }

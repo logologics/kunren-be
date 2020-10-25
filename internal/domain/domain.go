@@ -20,6 +20,14 @@ type Language string
 var Japanese Language = "ja"
 var English Language = "en"
 
+// ToLanguage convets a string to a d.Language
+func ToLanguage(lang string) Language {
+	switch lang {
+	case "ja": return Japanese
+	default: return English
+	} 
+} 
+
 type Question struct {
 	ID       string   `json:"id"`
 	Question string   `json:"q"`
@@ -97,4 +105,11 @@ type SearchResult struct {
 type VocabListItem struct {
 	Vocab 
 	Word Word `json:"key" bson:"word,omitempty"`
+}
+
+// Message is a simply message object to send in 
+// some responses
+type Message struct {
+	Status int `json:"status"`
+	Message string `json:"msg"`
 }

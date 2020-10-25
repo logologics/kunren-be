@@ -77,7 +77,19 @@ func (mongo *Mongo) StoreVocab(v d.Vocab, inc bool) (d.Vocab, error) {
 // LoadVocab blax
 func (mongo *Mongo) LoadVocab(id mp.ObjectID) (d.Vocab, error) {
 	var v d.Vocab
-	err := mongo.load(mongo.wordsCollection(), id, &v)
+	err := mongo.loadOne(mongo.wordsCollection(), id, &v)
+	if err != nil {
+		return d.Vocab{}, err
+	}
+
+	return v, nil
+}
+
+// FindVocab blax
+func (mongo *Mongo) FindVocab(u d.User, lang d.Language, key string) (d.Vocab, error) {
+	var v d.Vocab
+	q := bson.M{"key": key, "userID": u.ID, "language": lang}
+	err := mongo.findOne(mongo.vocabsCollection(), q, &v)
 	if err != nil {
 		return d.Vocab{}, err
 	}

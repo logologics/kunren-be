@@ -81,7 +81,7 @@ func (mongo *Mongo) StoreWord(word d.Word) (d.Word, error) {
 // LoadWord bla
 func (mongo *Mongo) LoadWord(id mp.ObjectID) (d.Word, error) {
 	var w d.Word
-	err := mongo.load(mongo.wordsCollection(), id, &w)
+	err := mongo.loadOne(mongo.wordsCollection(), id, &w)
 	if err != nil {
 		return d.Word{}, err
 	}

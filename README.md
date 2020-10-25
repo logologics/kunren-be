@@ -16,11 +16,20 @@ curl -vX POST -H 'contenttype: application/json' --data-binary @resource/words/w
 ```
 
 # search
+
 ```
-curl -H "ContentType: application/json" localhost:9876/search/jisho/home
+curl -H "ContentType: application/json" localhost:9876/search/jisho？q＝home
 ```
 
 # list vocab
 ```
-curl -H "ContentType: application/json" localhost:9876/vocabs
+curl -H "ContentType: application/json" 'localhost:9876/vocabs/list?k='
 ```
+
+# find vocab
+```
+curl -H "ContentType: application/json" 'localhost:9876/vocabs/find?l=ja&k=猫'
+```
+
+
+# Atlas

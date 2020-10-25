@@ -50,9 +50,10 @@ func Connect(config *d.Config) (r.Repo, error) {
 		return &Mongo{}, nil
 	}
 
+
+
 	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	err = client.Connect(ctx)
-
 	kunrenDb := client.Database("kunren")
 
 	m := &Mongo{client: client, kunrenDB: kunrenDb, timeout: timeout, mtx: &sync.Mutex{}}
@@ -129,12 +130,19 @@ func (m *Mongo) delete(collection *mlib.Collection, id mp.ObjectID) error {
 
 	return nil
 }
-func (m *Mongo) load(collection *mlib.Collection, id mp.ObjectID, target interface{}) error {
+
+
+func (m *Mongo) loadOne(collection *mlib.Collection, id mp.ObjectID, target interface{}) error {
+	return m.findOne(collection, bson.M{"_id": id}, target)
+}
+
+// FindOne queries a single document with FindOne
+func (m *Mongo) findOne(collection *mlib.Collection, query bson.M, target interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), m.timeout)
 	defer cancel()
 
 	// ## find
-	fRes := collection.FindOne(ctx, bson.M{"_id": id})
+	fRes := collection.FindOne(ctx, query)
 	fResErr := fRes.Err()
 
 	if fResErr != nil && fResErr != mlib.ErrNoDocuments {
@@ -143,7 +151,7 @@ func (m *Mongo) load(collection *mlib.Collection, id mp.ObjectID, target interfa
 
 	// # if not found 1
 	if fResErr != nil {
-		return fmt.Errorf("Could not find object with id  %v", id)
+		return fmt.Errorf("Could not find object with query  %v", query)
 	}
 
 	// ## decode
@@ -155,4 +163,3 @@ func (m *Mongo) load(collection *mlib.Collection, id mp.ObjectID, target interfa
 	return nil
 
 }
-

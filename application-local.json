@@ -3,6 +3,6 @@
     "kunrenfe" : "http://localhost:3000",
     "db" :{
       "type": "mongodb",
-      "url": "mongodb+srv://kunren:PcjBFR5DvsQdI2ft@sandbox.pxnni.mongodb.net/kunren"
+      "url": "mongodb://localhost:27017"
     }
 }

@@ -18,6 +18,11 @@ func NewHTTPBadRequest(err error, msg string, ctx string) HTTPError {
 	return HTTPError{err, msg, http.StatusBadRequest, ctx}
 }
 
+// NewNotFound creates a 404
+func NewNotFound(err error, msg string, ctx string) HTTPError {
+	return HTTPError{err, msg, http.StatusNotFound, ctx}
+}
+
 // NewHTTPInternalServerError creates a 500
 func NewHTTPInternalServerError(err error, msg string, ctx string) HTTPError {
 	return HTTPError{err, msg, http.StatusInternalServerError, ctx}
