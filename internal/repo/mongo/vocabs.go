@@ -64,6 +64,8 @@ func (mongo *Mongo) StoreVocab(v d.Vocab, inc bool) (d.Vocab, error) {
 	// ## otherwise insert
 	v.ID = mp.NewObjectID()
 	v.Seen = 1
+	v.DateSeen = time.Now()
+	v.DateCreated = v.DateSeen
 	iRes, err := mongo.vocabsCollection().InsertOne(ctx, v)
 	if err != nil {
 		return d.Vocab{}, err

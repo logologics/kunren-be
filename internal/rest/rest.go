@@ -53,7 +53,7 @@ func (e *Env) FindVocab(w http.ResponseWriter, r *http.Request) error {
 	key := mux.Vars(r)["key"]
 	lang := mux.Vars(r)["lang"]
 	check, _ := strconv.ParseBool(mux.Vars(r)["check"])
-	log.Infof("Lang/Key/`check %v/%v/%v", lang, key)
+	log.Infof("Lang/Key/check %v/%v/%v", lang, key, check)
 
 	vocabs, err := e.Repo.FindVocab(e.User, d.ToLanguage(lang), key)
 	if err != nil && check {
