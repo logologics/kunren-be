@@ -103,8 +103,28 @@ type SearchResult struct {
 }
 
 type VocabListItem struct {
-	Vocab 
-	Word Word `json:"key" bson:"word,omitempty"`
+	ID            mp.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Language      Language    `json:"language" bson:"language,omitempty"`
+	WordID        mp.ObjectID `json:"wordID" bson:"wordID,omitempty"`
+	UserID        mp.ObjectID `json:"userID" bson:"userID,omitempty"`
+	SearchStrings []string    `json:"searchString" bson:"searchStrings,omitempty"`
+	DateCreated   time.Time   `json:"dateCreated" bson:"dateCreated,omitempty"`
+	DateSeen      time.Time   `json:"dateSeen" bson:"dateSeen,omitempty"`
+	Seen          int         `json:"seen" bson:"seen,omitempty"`
+	Confidence    int         `json:"confidence" bson:"confidence,omitempty"`
+	Key           string      `json:"key" bson:"key,omitempty"`
+	Word *Word `json:"word" bson:"word,omitempty"`
+}
+
+type VocabPage struct {
+	Vocabs []VocabListItem`json:"vocabs"`
+	Seq int `json:"seq"`
+	Size int `json:"size"`
+	Count int `json:"cnt"`
+	TotalCount int64 `json:"total"`
+	IsLast bool `json:"isLast"`
+	IsFirst bool `json:"isFirst"`
+	Last int `json:"last"`
 }
 
 // Message is a simply message object to send in 

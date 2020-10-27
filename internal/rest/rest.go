@@ -17,8 +17,6 @@ import (
 // Env is a local env type
 type Env api.Env
 
-var pageSize = 10
-
 // SearchJisho returns the handler for GET /search/jisho/{query}
 func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
 	vars := mux.Vars(r)
@@ -36,10 +34,22 @@ func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
 
 // Vocabs returns all vocabs for the user
 func (e *Env) Vocabs(w http.ResponseWriter, r *http.Request) error {
-	key := mux.Vars(r)["key"]
-	log.Infof("Key %v", key)
+	page, err := strconv.Atoi(mux.Vars(r)["page"])
+	if err != nil {
+		return api.NewHTTPBadRequest(err, "Wrong page param value", "rest - Vocabs()")
+	}
+	pageSize, err := strconv.Atoi(mux.Vars(r)["pageSize"])
+	if err != nil {
+		return api.NewHTTPBadRequest(err, "Wrong page size param value", "rest - Vocabs()")
+	}
+	srt, err := d.ParseSorting(mux.Vars(r)["sorting"])
+	if err != nil {
+		return api.NewHTTPBadRequest(err, "Wrong sorting param value", "rest - Vocabs()")
+	}
+	
+	log.Infof("page/pageSize/srt %v/%v/%v", page, pageSize, srt)
 
-	vocabs, err := e.Repo.ListVocabs(key, pageSize, e.User)
+	vocabs, err := e.Repo.ListVocabs(page, pageSize, srt, e.User)
 	if err != nil {
 		return api.NewHTTPInternalServerError(err, "Error retrieving Vocabs", "rest - Vocabs()")
 	}
@@ -95,7 +105,7 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 		WordID:        storedWord.ID,
 		UserID:        e.User.ID,
 		Language:      word.Language,
-		SearchStrings: []string{storedWord.Key, storedWord.Lemma.Reading},
+		SearchStrings: []string{storedWord.Lexeme, storedWord.Lemma.Reading},
 	}
 	_, err = e.Repo.StoreVocab(vocab, true)
 	if err != nil {

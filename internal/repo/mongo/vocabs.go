@@ -106,18 +106,29 @@ func (mongo *Mongo) DeleteVocab(id mp.ObjectID) error {
 }
 
 // ListVocabs lists all Vocabs + words of the user
-func (mongo *Mongo) ListVocabs(key string, pageSize int, u d.User) ([]d.VocabListItem, error) {
+func (mongo *Mongo) ListVocabs(page int, pageSize int, srt []d.Sorting, u d.User) (d.VocabPage, error) {
+	if page < 0 || pageSize < 1 || page > 250 || pageSize > 50 {
+		return d.VocabPage{}, fmt.Errorf("Wrong page/pagesize arg %v/%v", page, pageSize)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), mongo.timeout)
 	defer cancel()
+
+	skip := page * pageSize
 
 	matchStage := bson.D{
 		{
 			Key: "$match",
 			Value: mp.M{
-				"key":    mp.M{"$gt": key},
 				"userID": u.ID,
 			},
+		},
+	}
+
+	skipStage := bson.D{
+		{
+			Key:   "$skip",
+			Value: skip,
 		},
 	}
 
@@ -126,6 +137,24 @@ func (mongo *Mongo) ListVocabs(key string, pageSize int, u d.User) ([]d.VocabLis
 			Key:   "$limit",
 			Value: pageSize,
 		},
+	}
+
+	var sortStage bson.D
+	if len(srt) > 0 {
+		sortStage = bson.D{
+			{
+				Key:   "$sort",
+				Value: d.SortingToBson(srt),
+			},
+		}
+	} else {
+		sortStage = bson.D{
+			{
+				Key:   "$sort",
+				Value: bson.M{"key": 1},
+			},
+		}
+
 	}
 
 	lookupStage := bson.D{
@@ -151,22 +180,52 @@ func (mongo *Mongo) ListVocabs(key string, pageSize int, u d.User) ([]d.VocabLis
 	}
 
 	cur, err := mongo.vocabsCollection().Aggregate(
-		ctx, mlib.Pipeline{matchStage, limitStage, lookupStage, unwindStage},
+		ctx, mlib.Pipeline{matchStage, skipStage, limitStage, sortStage, lookupStage, unwindStage},
 	)
 	if err != nil {
-		return nil, err
+		return d.VocabPage{}, err
 	}
 	var vocabs []d.VocabListItem
 	if err = cur.All(ctx, &vocabs); err != nil {
-		return nil, err
+		return d.VocabPage{}, err
 	}
 
-	log.Infof("git %v", vocabs)
 	if vocabs == nil {
-		return []d.VocabListItem{}, nil
+		vocabs = []d.VocabListItem{}
 	}
 
-	return vocabs, nil
+	total := mongo.countVocabsForUser(u.ID)
+	l := len(vocabs)
+	isLast := int64(skip+l) >= total
+	isFirst := page == 0
+	last := int(total / int64(pageSize))
+	if int64(last*pageSize) >= total {
+		last--
+	}
+	return d.VocabPage{
+			Vocabs:     vocabs,
+			Seq:        page,
+			Size:       pageSize,
+			Count:      l,
+			TotalCount: total,
+			IsLast:     isLast,
+			IsFirst:    isFirst,
+			Last:       last,
+		},
+		nil
+}
+
+func (mongo *Mongo) countVocabsForUser(uID mp.ObjectID) int64 {
+	ctx, cancel := context.WithTimeout(context.Background(), mongo.timeout)
+	defer cancel()
+
+	cnt, err := mongo.vocabsCollection().CountDocuments(ctx, bson.M{"userID": uID})
+	if err != nil {
+		log.Errorf("Count error %v", err)
+		return 0
+	}
+
+	return cnt
 }
 
 func createVocabsIndexes(ctx context.Context, db *mlib.Database) error {

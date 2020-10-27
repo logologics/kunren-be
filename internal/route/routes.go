@@ -56,7 +56,7 @@ func makeRoutes(env *api.Env) []Route {
 			"Get Vocabs",
 			"GET",
 			"/vocabs",
-			[]string{"k", "{key}"},
+			[]string{"p", "{page:\\d+}", "s", "{sorting}", "ps", "{pageSize:\\d+}"},
 			restEnv.CheckRepo(restEnv.Vocabs),
 			"",
 		},
