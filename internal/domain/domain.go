@@ -95,6 +95,7 @@ type Vocab struct {
 	Seen          int         `json:"seen" bson:"seen,omitempty"`
 	Confidence    int         `json:"confidence" bson:"confidence,omitempty"`
 	Key           string      `json:"key" bson:"key,omitempty"`
+	Tags					[]string		`json:"tags" bson:"tags,omitempty"`
 }
 
 type SearchResult struct {

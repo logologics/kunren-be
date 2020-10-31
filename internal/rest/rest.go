@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -46,7 +47,7 @@ func (e *Env) Vocabs(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return api.NewHTTPBadRequest(err, "Wrong sorting param value", "rest - Vocabs()")
 	}
-	
+
 	log.Infof("page/pageSize/srt %v/%v/%v", page, pageSize, srt)
 
 	vocabs, err := e.Repo.ListVocabs(page, pageSize, srt, e.User)
@@ -63,7 +64,6 @@ func (e *Env) FindVocab(w http.ResponseWriter, r *http.Request) error {
 	key := mux.Vars(r)["key"]
 	lang := mux.Vars(r)["lang"]
 	check, _ := strconv.ParseBool(mux.Vars(r)["check"])
-	log.Infof("Lang/Key/check %v/%v/%v", lang, key, check)
 
 	vocabs, err := e.Repo.FindVocab(e.User, d.ToLanguage(lang), key)
 	if err != nil && check {
@@ -100,12 +100,14 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 		return api.NewHTTPInternalServerError(err, "Can't store", "rest - Remember()")
 	}
 
+	tags := strings.Split(mux.Vars(r)["tags"], ":")
 	vocab := d.Vocab{
 		Key:           storedWord.Key,
 		WordID:        storedWord.ID,
 		UserID:        e.User.ID,
 		Language:      word.Language,
 		SearchStrings: []string{storedWord.Lexeme, storedWord.Lemma.Reading},
+		Tags:          tags,
 	}
 	_, err = e.Repo.StoreVocab(vocab, true)
 	if err != nil {

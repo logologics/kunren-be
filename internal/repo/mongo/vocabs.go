@@ -11,6 +11,7 @@ import (
 	mp "go.mongodb.org/mongo-driver/bson/primitive"
 	mlib "go.mongodb.org/mongo-driver/mongo"
 	mopt "go.mongodb.org/mongo-driver/mongo/options"
+	"go4.org/sort"
 )
 
 func (mongo *Mongo) vocabsCollection() *mlib.Collection {
@@ -46,6 +47,7 @@ func (mongo *Mongo) StoreVocab(v d.Vocab, inc bool) (d.Vocab, error) {
 		v.ID = loadedVocab.ID
 		v.DateSeen = time.Now()
 		v.Seen = loadedVocab.Seen
+		v.Tags = MergeAndSort(v.Tags, loadedVocab.Tags)
 
 		if inc {
 			v.Seen++
@@ -58,6 +60,7 @@ func (mongo *Mongo) StoreVocab(v d.Vocab, inc bool) (d.Vocab, error) {
 			return d.Vocab{}, fmt.Errorf("Nothing was updated for vocab %v", v.ID)
 		}
 
+		log.Infof("Updated vocab with id %v created\n", v.ID)
 		return v, nil
 	}
 
@@ -180,7 +183,7 @@ func (mongo *Mongo) ListVocabs(page int, pageSize int, srt []d.Sorting, u d.User
 	}
 
 	cur, err := mongo.vocabsCollection().Aggregate(
-		ctx, mlib.Pipeline{matchStage, skipStage, limitStage, sortStage, lookupStage, unwindStage},
+		ctx, mlib.Pipeline{matchStage, sortStage, skipStage, limitStage, lookupStage, unwindStage},
 	)
 	if err != nil {
 		return d.VocabPage{}, err
@@ -244,6 +247,10 @@ func createVocabsIndexes(ctx context.Context, db *mlib.Database) error {
 			Options: mopt.Index().SetName("vocabs_key"),
 		},
 		{
+			Keys:    bson.D{mp.E{Key: "tags", Value: 1}},
+			Options: mopt.Index().SetName("tags_key"),
+		},
+		{
 			Keys:    bson.D{mp.E{Key: "searchStrings", Value: 1}},
 			Options: mopt.Index().SetName("vocabs_search_strings"),
 		},
@@ -262,4 +269,23 @@ func createVocabsIndexes(ctx context.Context, db *mlib.Database) error {
 	log.Infof("created indexes on vocabs: %v\n", names)
 
 	return nil
+}
+
+func MergeAndSort(a []string, b []string) []string {
+	res := make([]string, len(a))
+	copy(res, a)
+	for _, ele := range b {
+		res = appendIfMissing(res, ele)
+	}
+	sort.Slice(res, func(i, j int) bool { return res[i] < res[j] })
+	return res
+}
+
+func appendIfMissing(slice []string, s string) []string {
+	for _, ele := range slice {
+		if ele == s {
+			return slice
+		}
+	}
+	return append(slice, s)
 }

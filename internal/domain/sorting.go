@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
+	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -56,5 +56,6 @@ func SortingToBson(srt []Sorting) bson.M {
 	for _, s := range srt {
 		m[string(s.Field)] = s.SortOrder
 	}
+	log.Infof("Sorting %v",  m)
 	return m
 }

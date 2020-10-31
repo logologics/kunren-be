@@ -14,4 +14,5 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/viper v1.3.2
 	go.mongodb.org/mongo-driver v1.4.1
+	go4.org v0.0.0-20200411211856-f5505b9728dd
 )
