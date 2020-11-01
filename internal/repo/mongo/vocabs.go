@@ -108,9 +108,32 @@ func (mongo *Mongo) DeleteVocab(id mp.ObjectID) error {
 
 }
 
+func createMatch(uID mp.ObjectID, tags []string) mp.M {
+	match := mp.M{
+		"userID": uID,
+	}
+	
+	if len(tags) == 0 {
+		return match
+	}
+
+	bsonTags := mp.A{}
+	for _, t := range tags {
+		bsonTags = append(bsonTags, t)
+	} 
+	
+	match["tags"] = mp.M{
+		"$in": bsonTags,
+	}
+	return match
+}
+
+
 // ListVocabs lists all Vocabs + words of the user
-func (mongo *Mongo) ListVocabs(page int, pageSize int, srt []d.Sorting, u d.User) (d.VocabPage, error) {
-	if page < 0 || pageSize < 1 || page > 250 || pageSize > 50 {
+func (mongo *Mongo) ListVocabs(page int, pageSize int, 
+	srt []d.Sorting, u d.User, tags []string) (d.VocabPage, error) {
+	
+		if page < 0 || pageSize < 1 || page > 250 || pageSize > 50 {
 		return d.VocabPage{}, fmt.Errorf("Wrong page/pagesize arg %v/%v", page, pageSize)
 	}
 
@@ -119,12 +142,11 @@ func (mongo *Mongo) ListVocabs(page int, pageSize int, srt []d.Sorting, u d.User
 
 	skip := page * pageSize
 
+	match := createMatch(u.ID, tags)
 	matchStage := bson.D{
 		{
 			Key: "$match",
-			Value: mp.M{
-				"userID": u.ID,
-			},
+			Value: match,
 		},
 	}
 
@@ -197,7 +219,7 @@ func (mongo *Mongo) ListVocabs(page int, pageSize int, srt []d.Sorting, u d.User
 		vocabs = []d.VocabListItem{}
 	}
 
-	total := mongo.countVocabsForUser(u.ID)
+	total := mongo.countVocabsForUser(match)
 	l := len(vocabs)
 	isLast := int64(skip+l) >= total
 	isFirst := page == 0
@@ -218,11 +240,97 @@ func (mongo *Mongo) ListVocabs(page int, pageSize int, srt []d.Sorting, u d.User
 		nil
 }
 
-func (mongo *Mongo) countVocabsForUser(uID mp.ObjectID) int64 {
+// Tags returns a distinct list of all tags the user has created
+func (mongo *Mongo) Tags(uID mp.ObjectID) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), mongo.timeout)
 	defer cancel()
 
-	cnt, err := mongo.vocabsCollection().CountDocuments(ctx, bson.M{"userID": uID})
+	matchStage := bson.D{
+		{
+			Key: "$match",
+			Value: mp.M{
+				"userID": uID,
+			},
+		},
+	}
+
+	groupStage := bson.D{
+		{
+			Key: "$group",
+			Value: mp.M{
+				"_id": "all_tags",
+				"tags": mp.M{"$addToSet": "$tags"},
+			},
+		},
+	}
+
+	cur, err := mongo.vocabsCollection().Aggregate(
+		ctx, mlib.Pipeline{matchStage, groupStage},
+	)
+
+	if err != nil {
+		return []string{}, err
+	}
+	var tagsRaw []bson.D
+	if err = cur.All(ctx, &tagsRaw); err != nil {
+		return []string{}, err
+	}
+	log.Infof("got tags %v", tagsRaw)
+
+	tags := joinTagArrays(tagsRaw)
+
+	log.Infof("got tags %v", tags)
+	return tags, nil
+}
+
+func joinTagArrays(tagsRaw []bson.D) []string {
+	m := make(map[string]int)
+	for _, d := range tagsRaw {
+		tagsList := d.Map()["tags"].(mp.A)
+		for _, tagsIf := range tagsList {
+			tags := tagsIf.(mp.A)
+			for _, tagIf := range tags {
+				tag := tagIf.(string)
+				if tag != "" {
+					m[tag]=1
+				}
+			}
+		}	
+	}
+
+	res := make([]string, len(m))
+	i:=0
+	for k := range m {
+		res[i] = k
+		i++
+	}
+
+	sort.Slice(res, func(i, j int) bool { return res[i] < res[j] })
+	return res
+}
+
+// DeleteTag deletes a tag from all documents of the user
+func (mongo *Mongo) DeleteTag(uID mp.ObjectID, tag string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), mongo.timeout)
+	defer cancel()
+
+	updRes, err := mongo.vocabsCollection().UpdateMany(ctx, bson.M{"userID": uID}, bson.M{
+		"$pull": bson.M{"tags": tag},
+	})
+	if err != nil {
+		return err
+	}
+
+	log.Infof("Deleted %v from %v documents", tag, updRes.ModifiedCount)
+	return nil
+}
+
+
+func (mongo *Mongo) countVocabsForUser(match mp.M) int64 {
+	ctx, cancel := context.WithTimeout(context.Background(), mongo.timeout)
+	defer cancel()
+
+	cnt, err := mongo.vocabsCollection().CountDocuments(ctx, match)
 	if err != nil {
 		log.Errorf("Count error %v", err)
 		return 0

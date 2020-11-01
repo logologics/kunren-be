@@ -33,24 +33,36 @@ func (e *Env) SearchJisho(w http.ResponseWriter, r *http.Request) error {
 	return json.NewEncoder(w).Encode(sr)
 }
 
+func parseTagsParam(tags string) []string {
+	if len(tags) == 0 {
+		return []string{}
+	}
+	
+	return strings.Split(tags, ":")
+}
+
+
 // Vocabs returns all vocabs for the user
 func (e *Env) Vocabs(w http.ResponseWriter, r *http.Request) error {
-	page, err := strconv.Atoi(mux.Vars(r)["page"])
+	vars := mux.Vars(r)
+	page, err := strconv.Atoi(vars["page"])
 	if err != nil {
 		return api.NewHTTPBadRequest(err, "Wrong page param value", "rest - Vocabs()")
 	}
-	pageSize, err := strconv.Atoi(mux.Vars(r)["pageSize"])
+	pageSize, err := strconv.Atoi(vars["pageSize"])
 	if err != nil {
 		return api.NewHTTPBadRequest(err, "Wrong page size param value", "rest - Vocabs()")
 	}
-	srt, err := d.ParseSorting(mux.Vars(r)["sorting"])
+	srt, err := d.ParseSorting(vars["sorting"])
 	if err != nil {
 		return api.NewHTTPBadRequest(err, "Wrong sorting param value", "rest - Vocabs()")
 	}
 
-	log.Infof("page/pageSize/srt %v/%v/%v", page, pageSize, srt)
+	tags := parseTagsParam(vars["tags"])
+	
+	log.Infof("page/pageSize/srt/tags %v/%v/%v/%v", page, pageSize, srt, tags)
 
-	vocabs, err := e.Repo.ListVocabs(page, pageSize, srt, e.User)
+	vocabs, err := e.Repo.ListVocabs(page, pageSize, srt, e.User, tags)
 	if err != nil {
 		return api.NewHTTPInternalServerError(err, "Error retrieving Vocabs", "rest - Vocabs()")
 	}
@@ -64,6 +76,8 @@ func (e *Env) FindVocab(w http.ResponseWriter, r *http.Request) error {
 	key := mux.Vars(r)["key"]
 	lang := mux.Vars(r)["lang"]
 	check, _ := strconv.ParseBool(mux.Vars(r)["check"])
+
+	log.Infof("findVocab key/lang %v/%v", key, lang)
 
 	vocabs, err := e.Repo.FindVocab(e.User, d.ToLanguage(lang), key)
 	if err != nil && check {
@@ -100,7 +114,8 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 		return api.NewHTTPInternalServerError(err, "Can't store", "rest - Remember()")
 	}
 
-	tags := strings.Split(mux.Vars(r)["tags"], ":")
+	tags := parseTagsParam(mux.Vars(r)["tags"])
+	
 	vocab := d.Vocab{
 		Key:           storedWord.Key,
 		WordID:        storedWord.ID,
@@ -109,13 +124,38 @@ func (e *Env) Remember(w http.ResponseWriter, r *http.Request) error {
 		SearchStrings: []string{storedWord.Lexeme, storedWord.Lemma.Reading},
 		Tags:          tags,
 	}
-	_, err = e.Repo.StoreVocab(vocab, true)
+	vocab, err = e.Repo.StoreVocab(vocab, true)
 	if err != nil {
 		return api.NewHTTPInternalServerError(err, "Can't create vocab", "rest - Remember()")
 	}
 
 	w.WriteHeader(http.StatusOK)
-	return json.NewEncoder(w).Encode(storedWord.ID)
+	return json.NewEncoder(w).Encode(vocab)
+}
+
+// Tags returns the list of tags of a user
+func (e *Env) Tags(w http.ResponseWriter, r *http.Request) error {
+
+	tags, err := e.Repo.Tags(e.User.ID)
+	if err != nil {
+		return api.NewHTTPInternalServerError(err, "Can't list tags", "rest - Tags()")
+	}
+	w.WriteHeader(http.StatusOK)
+	return json.NewEncoder(w).Encode(d.Tags{Tags: tags})
+
+}
+
+// DeleteTag deletes a tag from all documents of the user of a user
+func (e *Env) DeleteTag(w http.ResponseWriter, r *http.Request) error {
+	tag := mux.Vars(r)["tag"]
+
+	err := e.Repo.DeleteTag(e.User.ID, tag)
+	if err != nil {
+		return api.NewHTTPInternalServerError(err, "Can't list tags", "rest - Tags()")
+	}
+	w.WriteHeader(http.StatusOK)
+	return nil
+
 }
 
 // GenerateRandomQuestions returns the handler for GET /GenerateRandomQuestions

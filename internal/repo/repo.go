@@ -39,6 +39,8 @@ type VocabRepo interface {
 	StoreVocab(d.Vocab, bool) (d.Vocab, error)
 	LoadVocab(mp.ObjectID) (d.Vocab, error)
 	DeleteVocab(mp.ObjectID) error
-	ListVocabs(page int, pageSize int, srt []d.Sorting, u d.User) (d.VocabPage, error)
+	ListVocabs(page int, pageSize int, srt []d.Sorting, u d.User, tags []string) (d.VocabPage, error)
 	FindVocab(u d.User, lang d.Language, key string) (d.Vocab, error)
+	Tags(uID mp.ObjectID) ([]string, error)
+	DeleteTag(uID mp.ObjectID, tag string) error
 }
