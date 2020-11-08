@@ -4,5 +4,14 @@
     "db" :{
       "type": "mongodb",
       "url": "mongodb+srv://kunren:PcjBFR5DvsQdI2ft@sandbox.pxnni.mongodb.net/kunren"
+    },
+    "auth" : {
+      "providers": {
+        "google" : {
+          "clientId": "594079857929-facqf7hcr7nt5je2puh8qu2idurj0vn1.apps.googleusercontent.com",
+          "clientSecret": "4pU6zLuwZ3s36Kztn1VlpwAQ"
+        }
+      }
+      
     }
 }

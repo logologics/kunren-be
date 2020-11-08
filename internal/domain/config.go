@@ -1,10 +1,20 @@
 package domain
 
 type Config struct {
-	Address string  `json:"address"`
+	Address  string `json:"address"`
 	KunrenFe string `json:"kunrenfe"`
-	Https `json:"https"`
-	DB
+	Https    `json:"https"`
+	DB       `json:"db"`
+	Auth     Auth `json:"https"`
+}
+
+type Auth struct {
+	Providers map[string]Provider `json:"providers"`
+}
+
+type Provider struct {
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
 }
 
 // Https support
@@ -16,5 +26,5 @@ type Https struct {
 
 type DB struct {
 	Type string `json:"type"`
-	URL string `json:"url"`
+	URL  string `json:"url"`
 }

@@ -9,6 +9,8 @@ require (
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/go-test/deep v1.0.7
 	github.com/gorilla/mux v1.7.1
+	github.com/gorilla/sessions v1.1.1
+	github.com/markbates/goth v1.66.0
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.4.2

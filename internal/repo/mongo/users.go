@@ -12,14 +12,43 @@ import (
 	"time"
 )
 
+func (mongo *Mongo) usersCollection() *mlib.Collection {
+	return mongo.kunrenDB.Collection("users")
+}
+
 // StoreUser bla
-func (mongo *Mongo) StoreUser(d.User) (d.User, error) {
-	return d.User{}, nil
+func (mongo *Mongo) StoreUser(u d.User) (d.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), mongo.timeout)
+	defer cancel()
+
+	u.ID = mp.NewObjectID()
+	iRes, err := mongo.wordsCollection().InsertOne(ctx, u)
+	if err != nil {
+		return d.User{}, err
+	}
+
+	log.Printf("New user with id %v created\n", iRes.InsertedID.(mp.ObjectID))
+	return u, nil
 }
 
 // LoadUser bla
 func (mongo *Mongo) LoadUser(id mp.ObjectID) (d.User, error) {
-	return d.User{}, nil
+	var u d.User
+	err := mongo.loadOne(mongo.usersCollection(), id, &u)
+	if err != nil {
+		return d.User{}, err
+	}
+	return u, nil
+}
+
+// LoadUserByEmail bla
+func (mongo *Mongo) LoadUserByEmail(email string) (d.User, error) {
+	var u d.User
+	err := mongo.findOne(mongo.usersCollection(), bson.M{"email": email}, &u)
+	if err != nil {
+		return d.User{}, err
+	}
+	return u, nil
 }
 
 //UpdateUser bla

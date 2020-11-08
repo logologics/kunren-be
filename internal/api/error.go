@@ -18,6 +18,11 @@ func NewHTTPBadRequest(err error, msg string, ctx string) HTTPError {
 	return HTTPError{err, msg, http.StatusBadRequest, ctx}
 }
 
+// NewHTTPBadRequest creates a 400
+func NewHTTPUnauthorized(err error, msg string, ctx string) HTTPError {
+	return HTTPError{err, msg, http.StatusUnauthorized, ctx}
+}
+
 // NewNotFound creates a 404
 func NewNotFound(err error, msg string, ctx string) HTTPError {
 	return HTTPError{err, msg, http.StatusNotFound, ctx}

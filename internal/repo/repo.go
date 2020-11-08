@@ -30,6 +30,7 @@ type WordRepo interface {
 type UserRepo interface {
 	StoreUser(d.User) (d.User, error)
 	LoadUser(mp.ObjectID) (d.User, error)
+	LoadUserByEmail(email string) (d.User, error)
 	UpdateUser(d.User) error
 	DeleteUser(mp.ObjectID) error
 }

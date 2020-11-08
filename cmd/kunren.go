@@ -6,11 +6,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"github.com/logologics/kunren-be/internal/route"
+
 	"github.com/logologics/kunren-be/internal/api"
 	d "github.com/logologics/kunren-be/internal/domain"
-	mp "go.mongodb.org/mongo-driver/bson/primitive"
-
+	"github.com/logologics/kunren-be/internal/route"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -32,22 +31,12 @@ func main() {
 
 	config := &d.Config{}
 	viper.Unmarshal(config)
-	repo, err := api.CreateRepo(config)
+	env, err := api.CreateEnv(config)
 	if err != nil {
-		log.Fatal("Can't create repo: %v", err)
+		panic(fmt.Errorf("can't create env: %s", err))
 	}
-
-	uID, err := mp.ObjectIDFromHex("000000000000000000000005")
-	if err != nil {
-		log.Fatal("Can't create default suer: %v", err)
-	}
-
-	u := d.User{Email: "alex@alex.com", ID: uID}
-
-	env := api.Env{Config: config, Repo: repo, User: u}
-
-	mux := route.NewRestRouter(&env)
-	graceFul(&env)
+	mux := route.NewRestRouter(env)
+	graceFul()
 
 	log.WithFields(log.Fields{
 		"version": d.Version,
@@ -64,7 +53,7 @@ func main() {
 	}
 }
 
-func graceFul(env *api.Env) {
+func graceFul() {
 	var gracefulStop = make(chan os.Signal)
 	signal.Notify(gracefulStop, syscall.SIGTERM, syscall.SIGINT)
 	go func() {

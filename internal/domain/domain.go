@@ -40,7 +40,7 @@ type Questions struct {
 }
 
 type User struct {
-	ID        mp.ObjectID `json:"id"`
+	ID        mp.ObjectID `json:"_id"`
 	Name      string      `json:"name"`
 	Languages []Language  `json:"languages"`
 	Email     string      `json:"email"`
@@ -136,5 +136,10 @@ type Message struct {
 }
 
 type Tags struct {
-	Tags []string`json:"tags"`
+	Tags []string `json:"tags"`
+}
+
+type Session struct {
+	Email string `json:"email"`
+	Nonce string `json:"nonce"`
 }

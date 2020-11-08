@@ -50,8 +50,6 @@ func Connect(config *d.Config) (r.Repo, error) {
 		return &Mongo{}, nil
 	}
 
-
-
 	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	err = client.Connect(ctx)
 	kunrenDb := client.Database("kunren")

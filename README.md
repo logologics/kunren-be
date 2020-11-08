@@ -33,3 +33,9 @@ curl -H "ContentType: application/json" 'localhost:9876/vocabs/find?l=ja&k=猫'
 
 
 # Atlas
+
+# Kagome
+```
+docker run -d  -p 6060:6060 ikawaha/kagome:latest server
+curl -XPUT localhost:6060/tokenize -d'{"sentence":"すもももももももものうち", "mode":"normal"}' | jq 
+```
