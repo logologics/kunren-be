@@ -10,7 +10,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/cmd/kunren.go",
+      "program": "${workspaceFolder}/cmd/kunren/main.go",
       "env": {},
       "args": [],
       "cwd": "${workspaceFolder}"

@@ -1,10 +1,6 @@
 package route
 
-import (
-	"github.com/logologics/kunren-be/internal/api"
-	"github.com/logologics/kunren-be/internal/rest"
-)
-
+/*
 // Route represents a REST route
 type Route struct {
 	Name        string
@@ -15,23 +11,21 @@ type Route struct {
 	AcceptCT    string
 }
 
+func frontendHandler(env *api.Env) api.AppHandlerFunc {
+	restEnv := rest.Env(*env)
+
+	return restEnv.Index
+}
+
 func makeRoutes(env *api.Env) []Route {
 
 	restEnv := rest.Env(*env)
 
 	return []Route{
 		{
-			"Index",
-			"GET",
-			"/",
-			[]string{},
-			restEnv.AuthenticatedMW(restEnv.Index),
-			"",
-		},
-		{
 			"RandomQuestions",
 			"GET",
-			"/rq", // TODO request paras
+			"/api/rq", // TODO request paras
 			[]string{},
 			restEnv.AuthenticatedMW(restEnv.GenerateRandomQuestions),
 			"application/json",
@@ -39,7 +33,7 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Search Jisho",
 			"GET",
-			"/search/jisho",
+			"/api/search/jisho",
 			[]string{"q", "{query}"},
 			restEnv.AuthenticatedMW(restEnv.SearchJisho),
 			"application/json",
@@ -47,7 +41,7 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Remember Word",
 			"POST",
-			"/remember",
+			"/api/remember",
 			[]string{"t", "{tags}"},
 			restEnv.AuthenticatedMW(restEnv.CheckRepo(restEnv.Remember)),
 			"application/json",
@@ -55,7 +49,7 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Remember Word",
 			"POST",
-			"/remember",
+			"/api/remember",
 			[]string{},
 			restEnv.AuthenticatedMW(restEnv.CheckRepo(restEnv.Remember)),
 			"application/json",
@@ -63,7 +57,7 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Get Vocabs",
 			"GET",
-			"/vocabs",
+			"/api/vocabs",
 			[]string{"p", "{page:\\d+}", "s", "{sorting}", "ps", "{pageSize:\\d+}", "t", "{tags}"},
 			restEnv.AuthenticatedMW(restEnv.CheckRepo(restEnv.Vocabs)),
 			"",
@@ -71,7 +65,7 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Find Vocab (but only check)",
 			"GET",
-			"/vocabs/find",
+			"/api/vocabs/find",
 			[]string{"k", "{key}", "l", "{lang}", "c", "{check:true|false}"},
 			restEnv.AuthenticatedMW(restEnv.CheckRepo(restEnv.FindVocab)),
 			"",
@@ -79,7 +73,7 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Find Vocab",
 			"GET",
-			"/vocabs/find",
+			"/api/vocabs/find",
 			[]string{"k", "{key}", "l", "{lang}"},
 			restEnv.AuthenticatedMW(restEnv.CheckRepo(restEnv.FindVocab)),
 			"",
@@ -87,7 +81,7 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Get Tags",
 			"GET",
-			"/vocabs/tags",
+			"/api/vocabs/tags",
 			[]string{"l", "{lang}"},
 			restEnv.AuthenticatedMW(restEnv.CheckRepo(restEnv.Tags)),
 			"",
@@ -95,7 +89,7 @@ func makeRoutes(env *api.Env) []Route {
 		{
 			"Delete Tag",
 			"DELETE",
-			"/vocabs/tags/{tag}",
+			"/api/vocabs/tags/{tag}",
 			[]string{"l", "{lang}"},
 			restEnv.AuthenticatedMW(restEnv.CheckRepo(restEnv.DeleteTag)),
 			"",
@@ -133,7 +127,7 @@ func makeRoutes(env *api.Env) []Route {
 			restEnv.AuthenticatedMW(restEnv.CheckRepo(restEnv.Session)),
 			"",
 		},
-
-
 	}
 }
+
+*/

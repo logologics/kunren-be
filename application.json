@@ -1,17 +1,23 @@
 {
     "address" : ":9876",
-    "kunrenfe" : "http://localhost:3000",
+    "frontEndURL" : "/",
+    "frontEndPath" : "/Users/kaiser/gitp/kunren-fe/build",
     "db" :{
       "type": "mongodb",
       "url": "mongodb+srv://kunren:PcjBFR5DvsQdI2ft@sandbox.pxnni.mongodb.net/kunren"
     },
     "auth" : {
+      "sessionKeys": [
+        {
+          "authKey":"ba940c948d0aa9314ca1cf467cbf86eac84343a710833dcea6e6eb5490288ec8f9f6cf61fad66137b5cfdb82e2395bf3c7ef06a0428c12c89595a85a86272248",
+          "encryptionKey":"dc215a5e51808065a6189d91cc2818ad5ceb19f013c071c08b1f4d63ab2da1e6"
+        }
+      ],
       "providers": {
         "google" : {
           "clientId": "594079857929-facqf7hcr7nt5je2puh8qu2idurj0vn1.apps.googleusercontent.com",
           "clientSecret": "4pU6zLuwZ3s36Kztn1VlpwAQ"
         }
       }
-      
     }
 }

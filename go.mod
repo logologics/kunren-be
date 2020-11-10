@@ -1,14 +1,16 @@
 module github.com/logologics/kunren-be
 
-go 1.12
+go 1.15
 
 require (
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-test/deep v1.0.7
 	github.com/gorilla/mux v1.7.1
+	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.1.1
 	github.com/markbates/goth v1.66.0
 	github.com/mitchellh/hashstructure v1.0.0

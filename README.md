@@ -39,3 +39,15 @@ curl -H "ContentType: application/json" 'localhost:9876/vocabs/find?l=ja&k=猫'
 docker run -d  -p 6060:6060 ikawaha/kagome:latest server
 curl -XPUT localhost:6060/tokenize -d'{"sentence":"すもももももももものうち", "mode":"normal"}' | jq 
 ```
+
+
+# Deployment
+- Build container
+- Deploy on fargate
+- Expose through static IP in public subnet
+- change DNS record
+- create cert
+- write lambda function to run certbot
+
+
+

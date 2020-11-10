@@ -1,8 +1,9 @@
 package api
 
 import (
-	"net/http"
+	"encoding/hex"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	d "github.com/logologics/kunren-be/internal/domain"
 	r "github.com/logologics/kunren-be/internal/repo"
@@ -10,6 +11,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	mp "go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -25,23 +27,6 @@ type Env struct {
 	Repo   r.Repo
 	d.User
 	ProviderIndex *ProviderIndex
-}
-
-// AppHandlerFunc that returns error
-type AppHandlerFunc func(http.ResponseWriter, *http.Request) error
-
-// ServeHTTP calls
-func (fn AppHandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if err := fn(w, r); err != nil {
-		switch v := err.(type) {
-		case HTTPError:
-			log.WithFields(log.Fields{"loc": "ServeHttp", "err": v, "ctx": v.Context}).Error(v.Message)
-			v.SendError(w)
-		default:
-			log.WithFields(log.Fields{"loc": "ServeHttp", "err": err}).Error("Unexpected error")
-			http.Error(w, "Unexpected server error", http.StatusInternalServerError)
-		}
-	}
 }
 
 func CreateEnv(c *d.Config) (*Env, error) {
@@ -71,13 +56,35 @@ func createRepo(c *d.Config) (r.Repo, error) {
 	return mongo.Connect(c)
 }
 
-func initAuth(c *d.Config) (*ProviderIndex, error) {
-	
-	key := "scjhbafhgkiasgb,sjvba,sdjvhdsg,vhb" // Replace with your SESSION_SECRET or similar
-	maxAge := 86400 * 30                        // 30 days
-	isProd := false                             // Set to true when serving over https
+func decodeKeys(sessionKeys []d.SessionKey) ([][]byte, error) {
+	keys := make([][]byte, 2*len(sessionKeys))
+	cnt := 0
+	for _, sk := range sessionKeys {
+		key, err := hex.DecodeString(sk.AuthKey)
+		if err != nil {
+			return nil, err
+		}
+		keys[cnt] = key
+		cnt++
+		key, err = hex.DecodeString(sk.EncryptionKey)
+		if err != nil {
+			return nil, err
+		}
+		keys[cnt] = key
+		cnt++
+	}
+	return keys, nil
+}
 
-	store := sessions.NewCookieStore([]byte(key))
+func initAuth(c *d.Config) (*ProviderIndex, error) {
+
+	maxAge := 86400 * 30 // 30 days
+	isProd := false      // Set to true when serving over https
+	sessionKeys, err := decodeKeys(c.Auth.SessionKeys)
+	if err != nil {
+		return nil, err
+	}
+	store := sessions.NewCookieStore(sessionKeys...)
 	store.MaxAge(maxAge)
 	store.Options.Path = "/"
 	store.Options.HttpOnly = true // HttpOnly should always be enabled
@@ -96,4 +103,9 @@ func initAuth(c *d.Config) (*ProviderIndex, error) {
 	m["google"] = "Google"
 	keys := []string{"google"}
 	return &ProviderIndex{Providers: keys, ProvidersMap: m}, nil
+}
+
+func sendError(c *gin.Context, status int, err error, msg string) {
+	logrus.Errorf("Sending error %v: %v", msg, err)
+	c.JSON(status, gin.H{"msg": msg})
 }

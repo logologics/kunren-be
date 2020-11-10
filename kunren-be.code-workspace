@@ -1,10 +1,13 @@
 {
 	"folders": [
-		{
-			"name": "kunren-be",
-			"path": "."
-		}
-	],
+    {
+      "name": "kunren-be",
+      "path": "."
+    },
+    {
+      "path": "../kunren-fe"
+    }
+  ],
   "settings": {
     "cSpell.words": [
       "Idxmodels",

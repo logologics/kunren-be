@@ -2,14 +2,21 @@ package domain
 
 type Config struct {
 	Address  string `json:"address"`
-	KunrenFe string `json:"kunrenfe"`
+	FrontEndURL string `json:"frontEndURL"`
+	FrontEndPath   string `json:"frontEndPath"`
 	Https    `json:"https"`
 	DB       `json:"db"`
 	Auth     Auth `json:"https"`
 }
 
+type SessionKey struct {
+	AuthKey       string `json:"authKey"`
+	EncryptionKey string `json:"encryptionKey"`
+}
+
 type Auth struct {
-	Providers map[string]Provider `json:"providers"`
+	SessionKeys []SessionKey        `json:"sessionKeys"`
+	Providers   map[string]Provider `json:"providers"`
 }
 
 type Provider struct {
