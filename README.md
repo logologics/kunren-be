@@ -40,6 +40,12 @@ docker run -d  -p 6060:6060 ikawaha/kagome:latest server
 curl -XPUT localhost:6060/tokenize -d'{"sentence":"すもももももももものうち", "mode":"normal"}' | jq 
 ```
 
+# docker
+```
+cp -r ../kunren-fe/build/* web
+docker build . -t kunren
+docker run -v /Users/kaiser/gitp/kunren-be/config:/config -p 9876:9876 kunren
+```
 
 # Deployment
 - Build container

@@ -1,3 +1,6 @@
-./kunren
+kunren
+main
 debug
 .application.json
+/web
+/config

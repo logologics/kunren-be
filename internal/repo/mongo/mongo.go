@@ -17,7 +17,7 @@ import (
 	mopt "go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const timeout = 100 * time.Second
+const timeout = 2 * time.Second
 
 // Mongo is a implementation of Repos using MongoDB backend
 type Mongo struct {
@@ -87,6 +87,8 @@ func (m *Mongo) initDB() {
 		err := m.createIndexes()
 		if err == nil {
 			m.setReady()
+		} else {
+			log.Errorf("Trying to create mongo indexes failed: %v", err)
 		}
 	}
 }

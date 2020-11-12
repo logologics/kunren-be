@@ -11,6 +11,7 @@ import (
 func Load() (*domain.Config, error) {
 	viper.SetConfigName("application")
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("/config")
 	err := viper.ReadInConfig() 
 	if err != nil {            
 		panic(fmt.Errorf("fatal error config file: %s", err))
