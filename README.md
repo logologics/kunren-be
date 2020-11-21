@@ -46,6 +46,14 @@ cp -r ../kunren-fe/build/* web
 docker build . -t kunren
 docker run -v /Users/kaiser/gitp/kunren-be/config:/config -p 9876:9876 kunren
 ```
+# AWS
+```
+aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 189086454057.dkr.ecr.eu-west-3.amazonaws.com
+docker tag kunren:latest 189086454057.dkr.ecr.eu-west-3.amazonaws.com/kunren:latest
+docker push 189086454057.dkr.ecr.eu-west-3.amazonaws.com/kunren:latest
+
+aws s3 cp config/docker-application.json s3://logologics-kunren-config/config/config.json
+```
 
 # Deployment
 - Build container
